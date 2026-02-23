@@ -23,22 +23,25 @@ def create_healthcare_agent():
     
     url = f"{VAPI_BASE_URL}/assistant"
 
-    # Define the System Prompt with robust guardrails
+    # Define the System Prompt with robust guardrails and exact conversation workflow
     system_prompt = (
         "You are an empathetic, professional healthcare AI assistant built for an Indian regional hospital. "
-        "Your primary duties are to answer inbound patient calls, converse politely, note down symptoms, "
-        "schedule routine medical checks, analyze recent medical reports if requested, provide basic diet and precaution recommendations securely, "
-        "and identify if an immediate human triage nurse is needed.\n\n"
-        "STRICT GUARDRAILS & TONE:\n"
-        "1. NO MEDICAL HALLUCINATIONS: Under no circumstances should you diagnose conditions or prescribe medications. Do not offer final medical conclusions.\n"
-        "2. 8TH-GRADE READING LEVEL: Simplify all medical jargon so a middle-schooler or a non-medical family member can easily understand it. Avoid academic medical terms.\n"
-        "3. CULTURAL RELEVANCE: When giving general lifestyle recommendations or explaining general wellness, use contextually appropriate Indian analogies (e.g., recommend home-cooked meals like dal-chawal, kichdi instead of foreign diets).\n"
-        "4. ESCALATION TO HUMAN: If the patient displays severe symptoms (like chest pain, heavy bleeding, difficulty breathing, slurred speech) or sounds highly frustrated, immediately use the handoff_to_human tool to transfer to a real nurse.\n"
-        "5. LANGUAGE & ADAPTATION: Your default speaking language must be Hindi. However, if the patient starts speaking in English or another regional language, seamlessly switch to their language to make them comfortable.\n"
-        "6. STRUCTURED MEDICAL REPLIES: When a user asks about their medical report or diet, always fetch the data using the tools, process the information yourself, and reply strictly in this exact order:\n"
-        "   - First: Provide a simple, easy-to-understand summary of the medical report analysis.\n"
-        "   - Second: List the mandatory precautions based on their condition.\n"
-        "   - Third: Recommend the specific dietary plan."
+        "Your default speaking language must be Hindi. However, if the patient starts speaking in English or another regional language, seamlessly switch to their language to make them comfortable.\n\n"
+        "### CONVERSATION WORKFLOW (MANDATORY):\n"
+        "You MUST follow these explicit steps in order during the conversation:\n"
+        "1. GREETING & INITIAL QUESTION: Greet the user based on their language. Ask them how they would like to connect to the doctor today: via symptom diagnosis (telling you how they feel) OR via medical reports.\n"
+        "2. DATA GATHERING:\n"
+        "   - If Symptoms: Ask the patient ONE BY ONE the questions required to diagnose their condition. Do not ask a big list. Ask one question, wait for answer, then ask the next.\n"
+        "   - If Reports: Ask them to upload/provide their report or tell you their patient ID so you can pull it using the `analyze_medical_report` tool.\n"
+        "3. ANALYSIS & RECOMMENDATIONS: Once you have enough symptoms OR the medical report analysis, provide the user with the possible condition/diagnosis. Then, explain the diet plan and precautions verbally.\n"
+        "4. OFFER WRITTEN PLAN: Ask the user if they want the diet plan and precautions sent to them in written format via SMS. If they say yes, use the `send_written_plan` tool.\n"
+        "5. CONNECTION STATUS & FORWARDING: State that based on the seriousness of the issue, medicines may be required and you will now connect/forward their details to the doctor. Use the `forward_to_doctor` tool to send their symptoms, your analysis, and the diet given to the doctor's system.\n"
+        "6. CLOSING: Finally, ask 'What more can I do for you today?' in the language the patient is speaking.\n\n"
+        "### STRICT GUARDRAILS:\n"
+        "1. NO FINAL MEDICAL CONCLUSIONS: Say 'Based on your symptoms, it could be [condition], but the doctor will confirm.' Do not prescribe medicine.\n"
+        "2. 8TH-GRADE READING LEVEL: Simplify all medical jargon.\n"
+        "3. CULTURAL RELEVANCE: Use contextually appropriate Indian analogies for diet.\n"
+        "4. ESCALATION: Transfer to human nurse immediately if severe symptoms are detected using `handoff_to_human`."
     )
 
     # Construct the JSON payload required by Vapi
@@ -183,6 +186,86 @@ def create_healthcare_agent():
                             }
                         },
                         "required": ["condition", "patient_name"]
+                    }
+                }
+            },
+            {
+                "type": "server",
+                "messages": [
+                    {
+                        "type": "request-start",
+                        "content": "Sending the written diet plan and precautions to your phone...",
+                    }
+                ],
+                "server": {
+                    "url": f"{server_url}/send-written-plan"
+                },
+                "function": {
+                    "name": "send_written_plan",
+                    "description": "Simulates sending a written diet plan and precautions to the patient via SMS or WhatsApp if they request it.",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "patient_name": {
+                                "type": "string",
+                                "description": "The patient's name."
+                            },
+                            "phone_number": {
+                                "type": "string",
+                                "description": "The patient's contact number."
+                            },
+                            "diet_plan": {
+                                "type": "string",
+                                "description": "The diet plan advised by the AI."
+                            },
+                            "precautions": {
+                                "type": "string",
+                                "description": "The precautions advised by the AI."
+                            }
+                        },
+                        "required": ["patient_name", "phone_number", "diet_plan", "precautions"]
+                    }
+                }
+            },
+            {
+                "type": "server",
+                "messages": [
+                    {
+                        "type": "request-start",
+                        "content": "Compiling your details and forwarding the report to the doctor now...",
+                    }
+                ],
+                "server": {
+                    "url": f"{server_url}/forward-to-doctor"
+                },
+                "function": {
+                    "name": "forward_to_doctor",
+                    "description": "Compiles the patient's symptoms, diagnosis, and given diet into a report and forwards it to the doctor.",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "patient_name": {
+                                "type": "string",
+                                "description": "The patient's name."
+                            },
+                            "regtn_no": {
+                                "type": "string",
+                                "description": "The patient's registration number or ID."
+                            },
+                            "symptoms_or_report_summary": {
+                                "type": "string",
+                                "description": "Summary of what symptoms the patient reported or what the AI found in the medical report."
+                            },
+                            "agent_analysis": {
+                                "type": "string",
+                                "description": "The AI's possible diagnosis or analysis of the situation."
+                            },
+                            "diet_precautions_given": {
+                                "type": "string",
+                                "description": "The exact diet plan and precautions explained to the patient during the call."
+                            }
+                        },
+                        "required": ["patient_name", "regtn_no", "symptoms_or_report_summary", "agent_analysis", "diet_precautions_given"]
                     }
                 }
             }

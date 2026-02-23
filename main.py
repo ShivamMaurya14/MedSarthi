@@ -32,6 +32,19 @@ class DietPrecautionRequest(BaseModel):
     condition: str
     patient_name: str
 
+class SendWrittenPlanRequest(BaseModel):
+    patient_name: str
+    phone_number: str
+    diet_plan: str
+    precautions: str
+
+class ForwardToDoctorRequest(BaseModel):
+    patient_name: str
+    regtn_no: str
+    symptoms_or_report_summary: str
+    agent_analysis: str
+    diet_precautions_given: str
+
 @app.post("/book-appointment")
 async def book_appointment(request: AppointmentRequest):
     """
@@ -120,4 +133,52 @@ async def diet_and_precautions(request: DietPrecautionRequest):
             "diet_plan": diet,
             "precautions": precautions
         }
+    }
+
+@app.post("/send-written-plan")
+async def send_written_plan(request: SendWrittenPlanRequest):
+    """
+    Simulates sending the diet plan and precautions to the patient via SMS/WhatsApp.
+    """
+    logger.info(f"Sending written plan to {request.patient_name} at {request.phone_number}")
+    
+    # In a real app, you would use Twilio SMS API or WhatsApp API here.
+    return {
+        "status": "success",
+        "message": f"Written plan successfully sent to {request.patient_name}'s phone."
+    }
+
+@app.post("/forward-to-doctor")
+async def forward_to_doctor(request: ForwardToDoctorRequest):
+    """
+    Saves the aggregated call summary as a text file to act as a report,
+    simulating forwarding it to a doctor.
+    """
+    logger.info(f"Forwarding data to doctor for {request.patient_name} (Reg: {request.regtn_no})")
+    
+    reports_dir = "doctor_reports"
+    os.makedirs(reports_dir, exist_ok=True)
+    
+    # Clean filename
+    safe_name = "".join(c for c in request.patient_name if c.isalnum() or c in " _-").strip().replace(" ", "_")
+    safe_reg = "".join(c for c in request.regtn_no if c.isalnum() or c in " _-").strip()
+    
+    filename = f"{safe_name}_{safe_reg}.txt"
+    filepath = os.path.join(reports_dir, filename)
+    
+    report_content = f"--- PATIENT TRIAGE REPORT ---\n"
+    report_content += f"Patient Name: {request.patient_name}\n"
+    report_content += f"Registration No: {request.regtn_no}\n"
+    report_content += f"\n--- Symptoms / Report Summary ---\n{request.symptoms_or_report_summary}\n"
+    report_content += f"\n--- AI Agent Analysis ---\n{request.agent_analysis}\n"
+    report_content += f"\n--- Diet / Precautions Given ---\n{request.diet_precautions_given}\n"
+    report_content += f"-----------------------------\n"
+    
+    with open(filepath, "w", encoding="utf-8") as file:
+        file.write(report_content)
+        
+    return {
+        "status": "success",
+        "message": f"Report securely forwarded to the doctor. Saved as {filename}.",
+        "file_path": filepath
     }
