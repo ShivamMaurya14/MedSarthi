@@ -27,13 +27,15 @@ def create_healthcare_agent():
     system_prompt = (
         "You are an empathetic, professional healthcare AI assistant built for an Indian regional hospital. "
         "Your primary duties are to answer inbound patient calls, converse politely, note down symptoms, "
-        "schedule routine medical checks, and identify if an immediate human triage nurse is needed.\n\n"
+        "schedule routine medical checks, analyze recent medical reports if requested, provide basic diet and precaution recommendations securely, "
+        "and identify if an immediate human triage nurse is needed.\n\n"
         "STRICT GUARDRAILS & TONE:\n"
         "1. NO MEDICAL HALLUCINATIONS: Under no circumstances should you diagnose conditions or prescribe medications. Do not offer final medical conclusions.\n"
         "2. 8TH-GRADE READING LEVEL: Simplify all medical jargon so a middle-schooler or a non-medical family member can easily understand it. Avoid academic medical terms.\n"
         "3. CULTURAL RELEVANCE: When giving general lifestyle recommendations or explaining general wellness, use contextually appropriate Indian analogies (e.g., recommend home-cooked meals like dal-chawal, kichdi instead of foreign diets).\n"
         "4. ESCALATION TO HUMAN: If the patient displays severe symptoms (like chest pain, heavy bleeding, difficulty breathing, slurred speech) or sounds highly frustrated, immediately use the handoff_to_human tool to transfer to a real nurse.\n"
-        "5. EMPATHY & PATIENCE: Maintain a very polite, warm, and highly patient tone. Understand that patients may be in distress. Respond naturally in their preferred language."
+        "5. EMPATHY & PATIENCE: Maintain a very polite, warm, and highly patient tone. Understand that patients may be in distress. Respond naturally in their preferred language.\n"
+        "6. MEDICAL REPORTS & DIET: If the user asks you to check their report, use the analyze_medical_report tool. If they ask for diet or precautions for a specific condition, use the diet_and_precautions tool."
     )
 
     # Construct the JSON payload required by Vapi
@@ -122,6 +124,62 @@ def create_healthcare_agent():
                             }
                         },
                         "required": ["reason", "patient_name"]
+                    }
+                }
+            },
+            {
+                "type": "server",
+                "messages": [
+                    {
+                        "type": "request-start",
+                        "content": "Pulling your latest medical report from the system now...",
+                    }
+                ],
+                "server": {
+                    "url": f"{server_url}/analyze-medical-report"
+                },
+                "function": {
+                    "name": "analyze_medical_report",
+                    "description": "Retrieves and summarizes a patient's recent medical report. Use this strictly when a patient asks to check or explain their recent report/bloods/scans.",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "patient_id": {
+                                "type": "string",
+                                "description": "The patient ID or full name if ID is not known."
+                            }
+                        },
+                        "required": ["patient_id"]
+                    }
+                }
+            },
+            {
+                "type": "server",
+                "messages": [
+                    {
+                        "type": "request-start",
+                        "content": "Looking up recommended diet and precautions for your condition...",
+                    }
+                ],
+                "server": {
+                    "url": f"{server_url}/diet-and-precautions"
+                },
+                "function": {
+                    "name": "diet_and_precautions",
+                    "description": "Gets personalized diet recommendations and precautions for a specific condition. Use this when a user asks what to eat or what to avoid.",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "condition": {
+                                "type": "string",
+                                "description": "The medical condition the patient is asking about (e.g., diabetes, high cholesterol, fever)."
+                            },
+                            "patient_name": {
+                                "type": "string",
+                                "description": "The patient's name."
+                            }
+                        },
+                        "required": ["condition", "patient_name"]
                     }
                 }
             }

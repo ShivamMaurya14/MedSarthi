@@ -25,6 +25,13 @@ class HandoffRequest(BaseModel):
     reason: str
     patient_name: str
 
+class MedicalReportRequest(BaseModel):
+    patient_id: str
+
+class DietPrecautionRequest(BaseModel):
+    condition: str
+    patient_name: str
+
 @app.post("/book-appointment")
 async def book_appointment(request: AppointmentRequest):
     """
@@ -66,4 +73,51 @@ async def handoff_to_human(request: HandoffRequest):
                 }
             }
         ]
+    }
+
+@app.post("/analyze-medical-report")
+async def analyze_medical_report(request: MedicalReportRequest):
+    """
+    Simulates fetching and analyzing a patient's recent medical report.
+    """
+    logger.info(f"Fetching medical report analysis for patient ID: {request.patient_id}")
+    
+    # Mock data representing a pulled and parsed EHR report
+    return {
+        "status": "success",
+        "data": {
+            "patient_id": request.patient_id,
+            "recent_test": "Complete Blood Count (CBC) and Lipid Profile",
+            "date": "2023-10-15",
+            "findings": "Elevated LDL cholesterol at 160 mg/dL. Hemoglobin is normal. Fasting blood sugar is slightly high at 110 mg/dL.",
+            "doctor_notes": "Patient needs to reduce saturated fats and begin mild aerobic exercise. Monitor for pre-diabetes."
+        }
+    }
+
+@app.post("/diet-and-precautions")
+async def diet_and_precautions(request: DietPrecautionRequest):
+    """
+    Provides specific diet recommendations and precautions based on the condition.
+    """
+    logger.info(f"Generating diet & precautions for {request.patient_name} with condition: {request.condition}")
+    
+    # Simple mock logic based on condition
+    condition = request.condition.lower()
+    
+    if "cholesterol" in condition or "heart" in condition:
+        diet = "Avoid saturated fats (like ghee, butter, and fried foods). Eat fiber-rich foods like oats, fruits, and green vegetables."
+        precautions = "Exercise 30 mins daily. Avoid smoking and alcohol."
+    elif "sugar" in condition or "diabetes" in condition:
+        diet = "Low glycemic index foods. Replace white rice with brown rice or minor millets. Avoid sweets and sugary drinks."
+        precautions = "Check blood sugar regularly. Do not skip meals, especially breakfast."
+    else:
+        diet = "Standard balanced diet focusing on fresh local vegetables and whole grains."
+        precautions = "Stay hydrated and get enough rest."
+    
+    return {
+        "status": "success",
+        "recommendations": {
+            "diet_plan": diet,
+            "precautions": precautions
+        }
     }
