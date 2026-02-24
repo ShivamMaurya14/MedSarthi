@@ -74,6 +74,16 @@ def load_dl_models():
     custom_objects = {'Flatten': FixedFlatten, 'GlobalAveragePooling2D': FixedPooling}
     try:
         xray_path = os.path.join(MODELS_DIR, 'xrays_pneumonia.keras')
+        
+        # Download X-Ray model from Google Drive if missing
+        if not os.path.exists(xray_path):
+            logger.info("X-Ray model missing. Downloading from Google Drive...")
+            xray_id = "1x8DmMIhngdaYxInNvX-7-vAPaDk5UnIx"
+            url = f'https://drive.google.com/uc?id={xray_id}'
+            os.makedirs(MODELS_DIR, exist_ok=True)
+            gdown.download(url, xray_path, quiet=False)
+            logger.info("X-Ray model downloaded successfully.")
+
         if os.path.exists(xray_path):
             xray_model = tf.keras.models.load_model(xray_path, compile=False, custom_objects=custom_objects)
             logger.info("X-Ray model loaded.")
@@ -83,11 +93,11 @@ def load_dl_models():
     try:
         mri_path = os.path.join(MODELS_DIR, 'brain_tumor_model.keras')
         
-        # Download from Google Drive if missing
+        # Download Brain tumor model from Google Drive if missing
         if not os.path.exists(mri_path):
             logger.info("Brain tumor model missing. Downloading from Google Drive...")
-            model_id = "12oBWm5zYq7az62TPq7w68iFz5IOTygrG"
-            url = f'https://drive.google.com/uc?id={model_id}'
+            mri_id = "12oBWm5zYq7az62TPq7w68iFz5IOTygrG"
+            url = f'https://drive.google.com/uc?id={mri_id}'
             os.makedirs(MODELS_DIR, exist_ok=True)
             gdown.download(url, mri_path, quiet=False)
             logger.info("Brain tumor model downloaded successfully.")
