@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MEDsarthi - Doctor Portal</title>
+    <title>MedSarthi - Doctor Portal</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
@@ -15,11 +15,11 @@
         <aside class="sidebar">
             <div class="logo-area">
                 <span class="icon">⚕️</span>
-                <h2>MEDsarthi</h2>
-                <span style="font-size:0.8rem; color:var(--text-muted);">Doctor Panel</span>
+                <h2 style="font-size: 1.25rem;">Doctor Dashboard</h2>
             </div>
             <nav class="nav-menu">
-                <a href="#" class="nav-item active"><span class="icon">👥</span> My Patients</a>
+                <a href="doctor-dashboard.html" class="nav-item active"><span class="icon">👥</span> My Patients</a>
+                <a href="diagnostics.html" class="nav-item"><span class="icon">🔍</span> Disease Prediction</a>
                 <a href="#" class="nav-item"><span class="icon">📅</span> Schedule</a>
                 <a href="#" class="nav-item"><span class="icon">🔔</span> Triage Alerts</a>
             </nav>
@@ -30,9 +30,13 @@
 
         <!-- Main Content -->
         <main class="main-content">
-            <header class="top-header">
+            <header class="top-header" style="position: relative;">
                 <div class="search-bar">
                     <input type="text" placeholder="Search patient by ID or name...">
+                </div>
+                <div
+                    style="position: absolute; left: 50%; transform: translateX(-50%); font-size: 3.2rem; font-weight: 800; font-family: 'Inter', 'Outfit', sans-serif; letter-spacing: 1.5px; background: linear-gradient(135deg, var(--primary), var(--secondary)); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                    MedSarthi
                 </div>
                 <div class="user-profile">
                     <div class="avatar" style="background:#10B981;">DR</div>
@@ -46,20 +50,80 @@
             <section class="welcome-section" style="background-color: #ECFDF5;">
                 <div class="welcome-text">
                     <h1 style="color: #065F46;">Welcome, Dr. Kumar 👋</h1>
-                    <p style="color: #047857;">You have 2 new AI-generated triage reports to review today.</p>
+                    <p style="color: #047857;" id="welcome-subtext">Fetching your latest AI reports...</p>
                 </div>
             </section>
 
-            <section class="cards-grid">
-                <div class="card">
+            <section class="cards-grid" id="dashboard-content" style="display: flex; gap: 20px; flex-wrap: wrap;">
+                <div class="card" style="flex: 1; min-width: 300px;">
                     <h3>Recent AI Triage Summaries</h3>
-                    <p>No new critical alerts right now.</p>
-                    <br>
-                    <p class="status-text">We can build out the dynamic report fetching here next!</p>
+                    <div id="triage-list" style="margin-top: 15px;">
+                        <p>No new critical alerts right now.</p>
+                    </div>
+                </div>
+                <div class="card" style="flex: 1; min-width: 300px;">
+                    <h3>Upcoming AI-Booked Appointments</h3>
+                    <div id="appointment-list" style="margin-top: 15px;">
+                        <p>No appointments booked.</p>
+                    </div>
                 </div>
             </section>
         </main>
     </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+            try {
+                const res = await fetch('/api/doctor-dashboard-data');
+                const data = await res.json();
+
+                let reportCount = data.reports.length;
+                let apptCount = data.appointments.length;
+
+                document.getElementById('welcome-subtext').innerText =
+                    `You have ${reportCount} new triage summary and ${apptCount} new appointments.`;
+
+                // Render reports
+                if (reportCount > 0) {
+                    let reportsHtml = '';
+                    data.reports.forEach(r => {
+                        reportsHtml += `
+                            <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid var(--primary);">
+                                <h4 style="margin: 0; color: #1E293B;">${r.patient_name} <span style="font-size: 0.8rem; color: #64748B;">(${r.regtn_no})</span></h4>
+                                <p style="font-size: 0.9rem; margin: 8px 0; color: #DC2626; font-weight: bold;">Symptoms: ${r.symptoms}</p>
+                                <p style="font-size: 0.85rem; color: #334155;"><b>AI Analysis:</b> ${r.analysis}</p>
+                            </div>
+                        `;
+                    });
+                    document.getElementById('triage-list').innerHTML = reportsHtml;
+                }
+
+                // Render appointments
+                if (apptCount > 0) {
+                    let apptHtml = '';
+                    data.appointments.forEach(a => {
+                        let isUrgent = a.status === 'Urgent';
+                        let borderCol = isUrgent ? '#EF4444' : '#10B981';
+                        let txtCol = isUrgent ? '#EF4444' : '#10B981';
+
+                        apptHtml += `
+                            <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid ${borderCol};">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <h4 style="margin: 0; color: #1E293B;">${a.patient_name}</h4>
+                                    <span style="background: ${isUrgent ? '#FEE2E2' : '#D1FAE5'}; color: ${txtCol}; padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold;">${a.status}</span>
+                                </div>
+                                <p style="font-size: 0.9rem; margin: 8px 0; color: #475569;">📅 ${a.date} at ⏰ ${a.time}</p>
+                            </div>
+                        `;
+                    });
+                    document.getElementById('appointment-list').innerHTML = apptHtml;
+                }
+            } catch (e) {
+                console.error("Error loading dashboard data", e);
+            }
+        });
+    </script>
+
 </body>
 
 </html>

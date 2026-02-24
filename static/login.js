@@ -22,7 +22,7 @@ function handleLogin(event, role) {
         const pass = document.getElementById('patient-password').value;
         if (id === 'P-889012' && pass === 'demo123') {
             localStorage.setItem('loggedInPatientId', id);
-            window.location.href = 'patient-dashboard.html';
+            window.location.href = 'patient-dashboard.html?v=2';
         } else {
             alert("Invalid Patient Credentials. Try P-889012 / demo123");
         }
