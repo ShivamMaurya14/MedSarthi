@@ -19,12 +19,21 @@ function handleLogin(event, role) {
 
     if (role === 'patient') {
         const id = document.getElementById('patient-id').value;
-        // In a real app we'd authenticate. For now, set simulated ID in local storage.
-        localStorage.setItem('loggedInPatientId', id || 'P-889012');
-        window.location.href = 'patient-dashboard.html';
+        const pass = document.getElementById('patient-password').value;
+        if (id === 'P-889012' && pass === 'demo123') {
+            localStorage.setItem('loggedInPatientId', id);
+            window.location.href = 'patient-dashboard.html';
+        } else {
+            alert("Invalid Patient Credentials. Try P-889012 / demo123");
+        }
     } else if (role === 'doctor') {
         const docId = document.getElementById('doctor-id').value;
-        localStorage.setItem('loggedInDoctorId', docId || 'DR-5541');
-        window.location.href = 'doctor-dashboard.html';
+        const pass = document.getElementById('doctor-password').value;
+        if (docId === 'DR-5541' && pass === 'doctor123') {
+            localStorage.setItem('loggedInDoctorId', docId);
+            window.location.href = 'doctor-dashboard.html';
+        } else {
+            alert("Invalid Doctor Credentials. Try DR-5541 / doctor123");
+        }
     }
 }
