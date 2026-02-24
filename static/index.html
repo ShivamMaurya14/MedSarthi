@@ -97,14 +97,8 @@
         </main>
     </div>
 
-    <!-- Vapi Web SDK script -->
-    <script>
-        var vapiInstance = null;
-        const assistant = "YOUR_ASSISTANT_ID"; // We will set this in app.js
-        const apiKey = "YOUR_VAPI_PUBLIC_KEY"; // We will set this in app.js
-    </script>
-    <script src="https://cdn.jsdelivr.net/gh/VapiAI/html-script-tag@latest/dist/assets/index.js"></script>
-    <script src="app.js"></script>
+    <!-- App logic (loaded as ES module) -->
+    <script type="module" src="app.js"></script>
 </body>
 
 </html>

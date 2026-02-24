@@ -1,3 +1,5 @@
+import Vapi from "https://esm.sh/@vapi-ai/web";
+
 // Wait for DOM to load
 document.addEventListener("DOMContentLoaded", async () => {
     // 1. Mock "Login" to fetch patient dat
@@ -50,9 +52,7 @@ async function setupVapi() {
     }
 
     try {
-        vapi = window.vapiSDK.run({
-            apiKey: PUBLIC_KEY,
-        });
+        vapi = new Vapi(PUBLIC_KEY);
 
         const btn = document.getElementById("vapi-btn");
         const statusText = document.getElementById("call-status");
