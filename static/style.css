@@ -1,13 +1,15 @@
 :root {
-    --primary: #111827;
-    --secondary: #4F46E5;
-    --accent: #22D3EE;
+    --primary: #0F172A;
+    --secondary: #3B82F6;
+    --secondary-hover: #2563EB;
+    --accent: #10B981;
     --bg-color: #F8FAFC;
     --sidebar-bg: #FFFFFF;
-    --card-bg: #FFFFFF;
-    --text-color: #334155;
-    --text-muted: #94A3B8;
-    --border-color: #E2E8F0;
+    --card-bg: rgba(255, 255, 255, 0.7);
+    --text-color: #1E293B;
+    --text-muted: #64748B;
+    --border-color: rgba(226, 232, 240, 0.8);
+    --glass-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.08);
 }
 
 * {
@@ -170,20 +172,20 @@ body {
 }
 
 .vapi-button {
-    background: linear-gradient(135deg, var(--secondary), #818CF8);
+    background: linear-gradient(135deg, var(--secondary), var(--secondary-hover));
     color: white;
     border: none;
-    padding: 16px 32px;
+    padding: 18px 36px;
     border-radius: 99px;
-    font-size: 1.1rem;
+    font-size: 1.15rem;
     font-weight: 600;
     font-family: inherit;
     cursor: pointer;
     display: flex;
     align-items: center;
     gap: 12px;
-    box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .vapi-button:hover {
@@ -228,8 +230,17 @@ body {
 .card {
     background: var(--card-bg);
     padding: 32px;
-    border-radius: 20px;
-    border: 1px solid var(--border-color);
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow: var(--glass-shadow);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.12);
 }
 
 .card h3 {
@@ -322,16 +333,22 @@ body {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background: linear-gradient(135deg, #F0F4FF, #E0E7FF);
+    background: linear-gradient(135deg, #F8FAFC 0%, #E2E8F0 100%);
+    background-image: radial-gradient(at 0% 0%, hsla(217, 100%, 94%, 1) 0, transparent 50%),
+        radial-gradient(at 100% 100%, hsla(210, 100%, 94%, 1) 0, transparent 50%);
+    font-family: 'Outfit', sans-serif;
 }
 
 .login-container {
-    background: #ffffff;
-    padding: 60px 48px;
-    border-radius: 24px;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    padding: 50px 48px;
+    border-radius: 32px;
+    border: 1px solid rgba(255, 255, 255, 1);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.4) inset;
     width: 100%;
-    max-width: 450px;
+    max-width: 420px;
     text-align: center;
 }
 
@@ -380,7 +397,7 @@ body {
 .tab-btn.active {
     background: #ffffff;
     color: var(--secondary);
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
 }
 
 .login-form {
@@ -420,42 +437,50 @@ body {
 
 .input-group input {
     width: 100%;
-    padding: 14px 16px;
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
+    padding: 16px 20px;
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    border-radius: 16px;
     font-family: inherit;
     font-size: 1rem;
-    transition: border 0.3s;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     outline: none;
+    background: rgba(255, 255, 255, 0.8);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02) inset;
 }
 
 .input-group input:focus {
     border-color: var(--secondary);
+    background: #ffffff;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
 }
 
 .submit-btn {
-    background: var(--secondary);
+    background: linear-gradient(135deg, var(--secondary), var(--secondary-hover));
     color: white;
-    padding: 16px;
+    padding: 18px;
     border: none;
-    border-radius: 12px;
+    border-radius: 16px;
     font-size: 1.1rem;
     font-weight: 600;
     font-family: inherit;
     cursor: pointer;
-    margin-top: 12px;
-    transition: transform 0.2s, background 0.3s;
+    margin-top: 16px;
+    width: 100%;
+    box-shadow: 0 10px 20px -10px rgba(59, 130, 246, 0.5);
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s;
 }
 
 .submit-btn:hover {
     transform: translateY(-2px);
-    background: #4338CA;
+    box-shadow: 0 15px 25px -10px rgba(59, 130, 246, 0.6);
 }
 
 .doctor-btn {
-    background: #10B981;
+    background: linear-gradient(135deg, #10B981, #059669);
+    box-shadow: 0 10px 20px -10px rgba(16, 185, 129, 0.5);
 }
 
 .doctor-btn:hover {
-    background: #059669;
+    transform: translateY(-2px);
+    box-shadow: 0 15px 25px -10px rgba(16, 185, 129, 0.6);
 }
