@@ -1,6 +1,7 @@
 import os
 import logging
 from fastapi import FastAPI, HTTPException
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from dotenv import load_dotenv
 
@@ -44,6 +45,24 @@ class ForwardToDoctorRequest(BaseModel):
     symptoms_or_report_summary: str
     agent_analysis: str
     diet_precautions_given: str
+
+@app.get("/patient-profile/{patient_id}")
+async def get_patient_profile(patient_id: str):
+    """
+    Mock endpoint: fetches a patient's historical records and newly uploaded reports for the Web UI.
+    """
+    logger.info(f"Fetching profile for {patient_id}")
+    return {
+        "status": "success",
+        "data": {
+            "name": "Virat Sharma",
+            "age": 45,
+            "patient_id": patient_id,
+            "history": ["Hypertension (Diagnosed 2021)"],
+            "latest_report": "Lipid Profile from 15 Oct - High LDL (160 mg/dL)",
+            "upcoming_appointment": None
+        }
+    }
 
 @app.post("/book-appointment")
 async def book_appointment(request: AppointmentRequest):
@@ -182,3 +201,7 @@ async def forward_to_doctor(request: ForwardToDoctorRequest):
         "message": f"Report securely forwarded to the doctor. Saved as {filename}.",
         "file_path": filepath
     }
+
+# Mount static files (Web Interface) AFTER all API endpoints
+app.mount("/", StaticFiles(directory="static", html=True), name="static")
+

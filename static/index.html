@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sanjeevani - AI Patient Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo-area">
+                <span class="icon">🏥</span>
+                <h2>Sanjeevani</h2>
+            </div>
+            <nav class="nav-menu">
+                <a href="#" class="nav-item active"><span class="icon">📊</span> Overview</a>
+                <a href="#" class="nav-item"><span class="icon">📁</span> My Reports</a>
+                <a href="#" class="nav-item"><span class="icon">📅</span> Appointments</a>
+                <a href="#" class="nav-item"><span class="icon">💊</span> Prescriptions</a>
+            </nav>
+            <div class="logout-btn">
+                <a href="#" class="nav-item"><span class="icon">🚪</span> Logout</a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-header">
+                <div class="search-bar">
+                    <input type="text" placeholder="Search my records...">
+                </div>
+                <div class="user-profile">
+                    <div class="avatar" id="user-avatar">VS</div>
+                    <div class="user-details">
+                        <span class="name" id="user-name">Loading...</span>
+                        <span class="id" id="user-id">ID: -----</span>
+                    </div>
+                </div>
+            </header>
+
+            <section class="welcome-section">
+                <div class="welcome-text">
+                    <h1>Welcome back, <span id="welcome-name">Patient</span> 👋</h1>
+                    <p>Have a question or need to discuss your recent repots? Our AI doctor is ready to assist you in Hindi, English, and local languages.</p>
+                </div>
+                
+                <!-- The Magical Vapi Voice Button -->
+                <div class="ai-agent-card">
+                    <div class="pulse-ring"></div>
+                    <button id="vapi-btn" class="vapi-button">
+                        <span class="mic-icon">🎤</span>
+                        <span class="btn-text">Talk to AI Doctor</span>
+                    </button>
+                    <p id="call-status" class="status-text">Ready to connect</p>
+                </div>
+            </section>
+
+            <section class="cards-grid">
+                <!-- Vitals Card -->
+                <div class="card">
+                    <h3>Patient Vitals</h3>
+                    <div class="vitals-list">
+                        <div class="vital-item">
+                            <span class="label">Age</span>
+                            <span class="value" id="user-age">--</span>
+                        </div>
+                        <div class="vital-item">
+                            <span class="label">Chronic History</span>
+                            <span class="value warning" id="user-history">--</span>
+                        </div>
+                        <div class="vital-item">
+                            <span class="label">Last Visit</span>
+                            <span class="value">2 weeks ago</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Latest Report Card -->
+                <div class="card dark-card">
+                    <h3>Newest Report Available</h3>
+                    <div class="report-box">
+                        <div class="report-icon">📄</div>
+                        <div class="report-details">
+                            <h4 id="report-title">Loading...</h4>
+                            <p class="date">Uploaded: Today</p>
+                        </div>
+                    </div>
+                    <button class="action-btn-outline" onclick="triggerCall()">Ask AI to Analyze This Report</button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Vapi Web SDK script -->
+    <script>
+        var vapiInstance = null;
+        const assistant = "YOUR_ASSISTANT_ID"; // We will set this in app.js
+        const apiKey = "YOUR_VAPI_PUBLIC_KEY"; // We will set this in app.js
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/VapiAI/html-script-tag@latest/dist/assets/index.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
