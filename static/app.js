@@ -40,30 +40,26 @@ let isCallActive = false;
 let isRecording = false;
 
 function setupVapi() {
-    // Renamed function to avoid changing initialization logic
     const btn = document.getElementById("vapi-btn");
     const statusText = document.getElementById("call-status");
     const btnText = btn.querySelector('.btn-text');
     const icon = btn.querySelector('.mic-icon');
 
     btn.addEventListener("click", async () => {
-        if (!isCallActive) {
-            // Start conversation session
-            isCallActive = true;
+        if (!isRecording) {
+            // Start recording
             btn.classList.add('active');
             btn.style.background = "#EF4444";
-            btnText.innerText = "End Conversation";
-            icon.innerText = "⏹";
+            btnText.innerText = "Stop & Send Audio";
+            icon.innerText = "⏺";
 
             await startRecordingSession(statusText);
         } else {
-            // End conversation session
-            isCallActive = false;
+            // Stop recording and send
             btn.classList.remove('active');
             btn.style.background = "linear-gradient(135deg, var(--secondary), #818CF8)";
             btnText.innerText = "Talk to AI Doctor";
             icon.innerText = "🎤";
-            statusText.innerText = "Call ended.";
 
             if (mediaRecorder && isRecording) {
                 mediaRecorder.stop();
@@ -86,12 +82,19 @@ async function startRecordingSession(statusText) {
         mediaRecorder.onstart = () => {
             isRecording = true;
             audioChunks = [];
-            statusText.innerText = "Listening... (Talk now, click button again to submit)";
+            statusText.innerText = "Listening... (Speak now, click button again to send)";
         };
 
         mediaRecorder.onstop = async () => {
             isRecording = false;
-            if (!isCallActive) return; // User disconnected completely
+
+            // Cleanup the media stream tracks so the red recording dot goes away
+            stream.getTracks().forEach(track => track.stop());
+
+            if (audioChunks.length === 0) {
+                statusText.innerText = "No audio recorded.";
+                return;
+            }
 
             statusText.innerText = "AI is thinking...";
 
@@ -113,12 +116,9 @@ async function startRecordingSession(statusText) {
                 // Play audio
                 if (data.audio_base64) {
                     playBase64Audio(data.audio_base64, () => {
-                        // After audio finishes, restart listening automatically if still active
-                        if (isCallActive) {
-                            mediaRecorder.start();
-                        }
+                        statusText.innerText = "Call ended.";
                     });
-                } else if (!isCallActive) {
+                } else {
                     statusText.innerText = "Call ended.";
                 }
 
@@ -126,11 +126,9 @@ async function startRecordingSession(statusText) {
                 console.error(err);
                 statusText.innerText = "Error communicating with AI.";
             }
-
-            // Note: Once we process, we stop here. We restart listening ONLY when audio finishes playing.
         };
 
-        // Start initial recording
+        // Start recording
         mediaRecorder.start();
 
     } catch (e) {
