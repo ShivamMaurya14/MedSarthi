@@ -64,6 +64,17 @@ async def get_patient_profile(patient_id: str):
         }
     }
 
+@app.get("/api/config")
+async def get_config():
+    """
+    Provides the frontend with public keys safely so users don't need to be prompted.
+    Never expose secret API keys here, only public IDs.
+    """
+    return {
+        "vapi_public_key": os.getenv("VAPI_PUBLIC_KEY", ""),
+        "vapi_assistant_id": os.getenv("VAPI_ASSISTANT_ID", "")
+    }
+
 @app.post("/book-appointment")
 async def book_appointment(request: AppointmentRequest):
     """
