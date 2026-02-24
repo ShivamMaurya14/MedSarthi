@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MEDsarthi - Doctor Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo-area">
+                <span class="icon">⚕️</span>
+                <h2>MEDsarthi</h2>
+                <span style="font-size:0.8rem; color:var(--text-muted);">Doctor Panel</span>
+            </div>
+            <nav class="nav-menu">
+                <a href="#" class="nav-item active"><span class="icon">👥</span> My Patients</a>
+                <a href="#" class="nav-item"><span class="icon">📅</span> Schedule</a>
+                <a href="#" class="nav-item"><span class="icon">🔔</span> Triage Alerts</a>
+            </nav>
+            <div class="logout-btn">
+                <a href="index.html" class="nav-item"><span class="icon">🚪</span> Logout</a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-header">
+                <div class="search-bar">
+                    <input type="text" placeholder="Search patient by ID or name...">
+                </div>
+                <div class="user-profile">
+                    <div class="avatar" style="background:#10B981;">DR</div>
+                    <div class="user-details">
+                        <span class="name">Dr. Rajesh Kumar</span>
+                        <span class="id">Cardiologist</span>
+                    </div>
+                </div>
+            </header>
+
+            <section class="welcome-section" style="background-color: #ECFDF5;">
+                <div class="welcome-text">
+                    <h1 style="color: #065F46;">Welcome, Dr. Kumar 👋</h1>
+                    <p style="color: #047857;">You have 2 new AI-generated triage reports to review today.</p>
+                </div>
+            </section>
+
+            <section class="cards-grid">
+                <div class="card">
+                    <h3>Recent AI Triage Summaries</h3>
+                    <p>No new critical alerts right now.</p>
+                    <br>
+                    <p class="status-text">We can build out the dynamic report fetching here next!</p>
+                </div>
+            </section>
+        </main>
+    </div>
+</body>
+
+</html>

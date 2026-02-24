@@ -4,101 +4,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MEDsarthi - AI Patient Portal</title>
+    <title>MEDsarthi - Login</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 
-<body>
-    <div class="dashboard-container">
-        <!-- Sidebar -->
-        <aside class="sidebar">
-            <div class="logo-area">
-                <span class="icon">🏥</span>
-                <h2>MEDsarthi</h2>
+<body class="login-body">
+    <div class="login-container">
+        <div class="login-header">
+            <span class="logo-icon">🏥</span>
+            <h1>MEDsarthi</h1>
+            <p>Welcome to the AI Healthcare Portal</p>
+        </div>
+
+        <div class="tab-container">
+            <button class="tab-btn active" onclick="switchTab('patient')">Patient Login</button>
+            <button class="tab-btn" onclick="switchTab('doctor')">Doctor Login</button>
+        </div>
+
+        <!-- Patient Login Form -->
+        <form id="patient-login-form" class="login-form active-form" onsubmit="handleLogin(event, 'patient')">
+            <div class="input-group">
+                <label for="patient-id">Patient ID</label>
+                <input type="text" id="patient-id" placeholder="e.g. P-889012" required>
             </div>
-            <nav class="nav-menu">
-                <a href="#" class="nav-item active"><span class="icon">📊</span> Overview</a>
-                <a href="#" class="nav-item"><span class="icon">📁</span> My Reports</a>
-                <a href="#" class="nav-item"><span class="icon">📅</span> Appointments</a>
-                <a href="#" class="nav-item"><span class="icon">💊</span> Prescriptions</a>
-            </nav>
-            <div class="logout-btn">
-                <a href="#" class="nav-item"><span class="icon">🚪</span> Logout</a>
+            <div class="input-group">
+                <label for="patient-password">Password / OTP</label>
+                <input type="password" id="patient-password" placeholder="••••••••" required>
             </div>
-        </aside>
+            <button type="submit" class="submit-btn">Login as Patient</button>
+        </form>
 
-        <!-- Main Content -->
-        <main class="main-content">
-            <header class="top-header">
-                <div class="search-bar">
-                    <input type="text" placeholder="Search my records...">
-                </div>
-                <div class="user-profile">
-                    <div class="avatar" id="user-avatar">VS</div>
-                    <div class="user-details">
-                        <span class="name" id="user-name">Loading...</span>
-                        <span class="id" id="user-id">ID: -----</span>
-                    </div>
-                </div>
-            </header>
+        <!-- Doctor Login Form -->
+        <form id="doctor-login-form" class="login-form" onsubmit="handleLogin(event, 'doctor')">
+            <div class="input-group">
+                <label for="doctor-id">Doctor Registration ID</label>
+                <input type="text" id="doctor-id" placeholder="e.g. DR-5541" required>
+            </div>
+            <div class="input-group">
+                <label for="doctor-password">Password</label>
+                <input type="password" id="doctor-password" placeholder="••••••••" required>
+            </div>
+            <button type="submit" class="submit-btn doctor-btn">Login as Doctor</button>
+        </form>
 
-            <section class="welcome-section">
-                <div class="welcome-text">
-                    <h1>Welcome back, <span id="welcome-name">Patient</span> 👋</h1>
-                    <p>Have a question or need to discuss your recent repots? Our AI doctor is ready to assist you in
-                        Hindi, English, and local languages.</p>
-                </div>
-
-                <!-- The Magical Vapi Voice Button -->
-                <div class="ai-agent-card">
-                    <div class="pulse-ring"></div>
-                    <button id="vapi-btn" class="vapi-button">
-                        <span class="mic-icon">🎤</span>
-                        <span class="btn-text">Talk to AI Doctor</span>
-                    </button>
-                    <p id="call-status" class="status-text">Ready to connect</p>
-                </div>
-            </section>
-
-            <section class="cards-grid">
-                <!-- Vitals Card -->
-                <div class="card">
-                    <h3>Patient Vitals</h3>
-                    <div class="vitals-list">
-                        <div class="vital-item">
-                            <span class="label">Age</span>
-                            <span class="value" id="user-age">--</span>
-                        </div>
-                        <div class="vital-item">
-                            <span class="label">Chronic History</span>
-                            <span class="value warning" id="user-history">--</span>
-                        </div>
-                        <div class="vital-item">
-                            <span class="label">Last Visit</span>
-                            <span class="value">2 weeks ago</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Latest Report Card -->
-                <div class="card dark-card">
-                    <h3>Newest Report Available</h3>
-                    <div class="report-box">
-                        <div class="report-icon">📄</div>
-                        <div class="report-details">
-                            <h4 id="report-title">Loading...</h4>
-                            <p class="date">Uploaded: Today</p>
-                        </div>
-                    </div>
-                    <button class="action-btn-outline" onclick="triggerCall()">Ask AI to Analyze This Report</button>
-                </div>
-            </section>
-        </main>
     </div>
 
-    <!-- App logic (loaded as ES module) -->
-    <script type="module" src="app.js"></script>
+    <script src="login.js"></script>
 </body>
 
 </html>
