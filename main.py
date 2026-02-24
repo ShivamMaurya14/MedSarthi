@@ -250,6 +250,38 @@ async def forward_to_doctor(request: ForwardToDoctorRequest):
         "file_path": filepath
     }
 
+@app.get("/api/greeting")
+async def get_greeting():
+    """
+    Returns the initial greeting audio via Sarvam TTS.
+    """
+    sarvam_key = os.getenv("SARVAM_API_KEY")
+    if not sarvam_key or sarvam_key == "your_sarvam_api_key_here":
+        raise HTTPException(status_code=500, detail="Sarvam API Key is missing")
+        
+    url_tts = "https://api.sarvam.ai/text-to-speech"
+    headers_tts = {"api-subscription-key": sarvam_key, "Content-Type": "application/json"}
+    tts_payload = {
+        "inputs": ["नमस्ते! मैं अस्पताल का एआई असिस्टेंट हूँ। आज मैं आपके स्वास्थ्य में कैसे मदद कर सकता हूँ?"],
+        "target_language_code": "hi-IN",
+        "speaker": "shreya",
+        "pitch": 0,
+        "pace": 1.1,
+        "loudness": 1.5,
+        "speech_sample_rate": 8000,
+        "enable_preprocessing": True,
+        "model": "bulbul:v3"
+    }
+    
+    logger.info("Generating greeting audio via Sarvam TTS...")
+    tts_res = requests.post(url_tts, headers=headers_tts, json=tts_payload)
+    
+    if not tts_res.ok:
+        raise HTTPException(status_code=500, detail="Greeting TTS failed")
+        
+    audio_b64 = tts_res.json().get("audios", [])[0]
+    return {"audio_base64": audio_b64, "text": "नमस्ते! मैं अस्पताल का एआई असिस्टेंट हूँ। आज मैं आपके स्वास्थ्य में कैसे मदद कर सकता हूँ?"}
+
 @app.post("/api/voice-chat")
 async def process_voice_chat(audio: UploadFile = File(...)):
     """

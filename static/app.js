@@ -46,8 +46,43 @@ function setupVapi() {
     const icon = btn.querySelector('.mic-icon');
 
     btn.addEventListener("click", async () => {
-        if (!isRecording) {
-            // Start recording
+        if (!isCallActive) {
+            // Wake up the AI and get the first greeting
+            btn.classList.add('active');
+            btn.style.background = "#EF4444";
+            btnText.innerText = "Connecting...";
+            icon.innerText = "⏳";
+            statusText.innerText = "Waking up AI Doctor...";
+
+            try {
+                const greetingRes = await fetch('/api/greeting');
+                if (!greetingRes.ok) throw new Error("Greeting failed");
+                const greetingData = await greetingRes.json();
+
+                statusText.innerText = "AI is speaking...";
+                if (greetingData.audio_base64) {
+                    playBase64Audio(greetingData.audio_base64, async () => {
+                        // Once finished, set active and start recording
+                        isCallActive = true;
+                        btnText.innerText = "Stop & Send Audio";
+                        icon.innerText = "⏺";
+                        await startRecordingSession(statusText);
+                    });
+                } else {
+                    isCallActive = true;
+                    btnText.innerText = "Stop & Send Audio";
+                    icon.innerText = "⏺";
+                    await startRecordingSession(statusText);
+                }
+            } catch (err) {
+                console.error("Failed to greet:", err);
+                isCallActive = true;
+                btnText.innerText = "Stop & Send Audio";
+                icon.innerText = "⏺";
+                await startRecordingSession(statusText);
+            }
+        } else if (!isRecording) {
+            // We are in the call line but mic is off, start recording
             btn.classList.add('active');
             btn.style.background = "#EF4444";
             btnText.innerText = "Stop & Send Audio";
