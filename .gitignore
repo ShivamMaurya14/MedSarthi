@@ -163,3 +163,7 @@ cython_debug/
 
 # Mac OS DS_Store
 .DS_Store
+
+brain_tumor_model.keras
+xrays_pneumonia.keras
+

@@ -4,7 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MEDsarthi - AI Patient Portal</title>
+    <title>MedSarthi - AI Patient Portal</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
@@ -15,24 +18,28 @@
         <aside class="sidebar">
             <div class="logo-area">
                 <span class="icon">🏥</span>
-                <h2>MEDsarthi</h2>
+                <h2 style="font-size: 1.25rem;">Patient Dashboard</h2>
             </div>
             <nav class="nav-menu">
-                <a href="#" class="nav-item active"><span class="icon">📊</span> Overview</a>
+                <a href="patient-dashboard.html" class="nav-item active"><span class="icon">📊</span> Overview</a>
                 <a href="#" class="nav-item"><span class="icon">📁</span> My Reports</a>
                 <a href="#" class="nav-item"><span class="icon">📅</span> Appointments</a>
                 <a href="#" class="nav-item"><span class="icon">💊</span> Prescriptions</a>
             </nav>
             <div class="logout-btn">
-                <a href="#" class="nav-item"><span class="icon">🚪</span> Logout</a>
+                <a href="index.html" class="nav-item"><span class="icon">🚪</span> Logout</a>
             </div>
         </aside>
 
         <!-- Main Content -->
         <main class="main-content">
-            <header class="top-header">
+            <header class="top-header" style="position: relative;">
                 <div class="search-bar">
                     <input type="text" placeholder="Search my records...">
+                </div>
+                <div
+                    style="position: absolute; left: 50%; transform: translateX(-50%); font-size: 3.2rem; font-weight: 800; font-family: 'Inter', 'Outfit', sans-serif; letter-spacing: 1.5px; background: linear-gradient(135deg, var(--primary), var(--secondary)); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                    MedSarthi
                 </div>
                 <div class="user-profile">
                     <div class="avatar" id="user-avatar">VS</div>
@@ -43,21 +50,22 @@
                 </div>
             </header>
 
+            <!-- The Magical Vapi Voice Button -->
+            <div class="ai-agent-card"
+                style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; margin: 20px auto 30px auto; width: 100%;">
+                <div class="pulse-ring"></div>
+                <button id="vapi-btn" class="vapi-button" style="margin: 0 auto;">
+                    <span class="mic-icon">🎤</span>
+                    <span class="btn-text">Connect to Doctor Assistant</span>
+                </button>
+                <p id="call-status" class="status-text" style="text-align: center;">Ready to connect</p>
+            </div>
+
             <section class="welcome-section">
                 <div class="welcome-text">
                     <h1>Welcome back, <span id="welcome-name">Patient</span> 👋</h1>
                     <p>Have a question or need to discuss your recent repots? Our AI doctor is ready to assist you in
                         Hindi, English, and local languages.</p>
-                </div>
-
-                <!-- The Magical Vapi Voice Button -->
-                <div class="ai-agent-card">
-                    <div class="pulse-ring"></div>
-                    <button id="vapi-btn" class="vapi-button">
-                        <span class="mic-icon">🎤</span>
-                        <span class="btn-text">Talk to AI Doctor</span>
-                    </button>
-                    <p id="call-status" class="status-text">Ready to connect</p>
                 </div>
             </section>
 
@@ -71,6 +79,30 @@
                             <span class="value" id="user-age">--</span>
                         </div>
                         <div class="vital-item">
+                            <span class="label">Blood Pressure</span>
+                            <span class="value">120/80 mmHg</span>
+                        </div>
+                        <div class="vital-item">
+                            <span class="label">Heart Rate</span>
+                            <span class="value">72 bpm</span>
+                        </div>
+                        <div class="vital-item">
+                            <span class="label">Blood Sugar (Fasting)</span>
+                            <span class="value warning">126 mg/dL</span>
+                        </div>
+                        <div class="vital-item">
+                            <span class="label">SpO2</span>
+                            <span class="value">98%</span>
+                        </div>
+                        <div class="vital-item">
+                            <span class="label">Weight / BMI</span>
+                            <span class="value">75 kg / 24.5</span>
+                        </div>
+                        <div class="vital-item">
+                            <span class="label">Known Allergies</span>
+                            <span class="value warning">Penicillin</span>
+                        </div>
+                        <div class="vital-item">
                             <span class="label">Chronic History</span>
                             <span class="value warning" id="user-history">--</span>
                         </div>
@@ -82,16 +114,31 @@
                 </div>
 
                 <!-- Latest Report Card -->
-                <div class="card dark-card">
-                    <h3>Newest Report Available</h3>
-                    <div class="report-box">
-                        <div class="report-icon">📄</div>
-                        <div class="report-details">
-                            <h4 id="report-title">Loading...</h4>
-                            <p class="date">Uploaded: Today</p>
+                <div class="card dark-card" style="display: flex; flex-direction: column; min-height: 480px;">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h3 style="margin: 0; font-size: 1.4rem;">Patient Reports</h3>
+                        <label for="report-upload"
+                            style="background: var(--primary); color: white; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-size: 0.95rem; font-weight: 600; transition: 0.2s; border: 1px solid var(--primary);">
+                            + Upload Reports
+                        </label>
+                        <input type="file" id="report-upload" multiple style="display: none;"
+                            accept=".pdf,.png,.jpg,.jpeg" onchange="handleReportSelection(this)">
+                    </div>
+
+                    <div id="reports-container"
+                        style="flex-grow: 1; overflow-y: auto; max-height: 380px; padding-right: 10px; margin-bottom: 20px; display: flex; flex-direction: column; gap: 15px;">
+                        <div class="report-box">
+                            <div class="report-icon">📄</div>
+                            <div class="report-details">
+                                <h4 id="report-title">Loading initial report...</h4>
+                                <p class="date">Uploaded: Earlier</p>
+                            </div>
                         </div>
                     </div>
-                    <button class="action-btn-outline" onclick="triggerCall()">Ask AI to Analyze This Report</button>
+
+                    <button class="action-btn-outline" style="margin-top: auto; padding: 14px; font-size: 1.05rem;"
+                        onclick="document.getElementById('vapi-btn').click()">Request AI Analysis</button>
                 </div>
             </section>
         </main>
@@ -99,6 +146,49 @@
 
     <!-- App logic (loaded as ES module) -->
     <script type="module" src="app.js"></script>
+    <script>
+        window.pendingReportsToAI = null; // Store files globally for app.js
+
+        function handleReportSelection(inputEl) {
+            const files = inputEl.files;
+            if (files.length === 0) return;
+
+            const container = document.getElementById('reports-container');
+            container.innerHTML = ""; // Clear existing
+
+            for (let i = 0; i < files.length; i++) {
+                const box = document.createElement('div');
+                box.className = 'report-box';
+                // Inline styles for generated elements to match existing layout
+                box.style.display = 'flex';
+                box.style.alignItems = 'center';
+                box.style.gap = '16px';
+                box.style.padding = '16px';
+                box.style.background = 'rgba(255, 255, 255, 0.05)';
+                box.style.borderRadius = '12px';
+                box.style.border = '1px solid rgba(255, 255, 255, 0.1)';
+
+                const fileName = files[i].name;
+
+                box.innerHTML = `
+                    <div class="report-icon" style="font-size: 2rem; background: rgba(255, 255, 255, 0.1); width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; border-radius: 12px;">📄</div>
+                    <div class="report-details" style="flex: 1;">
+                        <h4 style="margin: 0; font-size: 1rem; color: white;">${fileName}</h4>
+                        <p class="date" style="margin: 5px 0 0 0; font-size: 0.85rem; color: #9CA3AF;">Status: Pending AI Analysis</p>
+                    </div>
+                `;
+                container.appendChild(box);
+            }
+
+            const btnLabel = inputEl.previousElementSibling;
+            btnLabel.innerText = "Files Ready ✓";
+            btnLabel.style.background = "#10B981";
+            btnLabel.style.borderColor = "#10B981";
+
+            // Store files for when the "Talk to AI Doctor" button is clicked
+            window.pendingReportsToAI = files;
+        }
+    </script>
 </body>
 
 </html>

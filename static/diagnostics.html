@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedSarthi - Disease Prediction Module</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .tab {
+            padding: 0.8rem 1.5rem;
+            background: var(--sidebar-bg);
+            border-radius: 8px;
+            cursor: pointer;
+            border: 1px solid var(--border-color);
+            font-weight: 500;
+        }
+
+        .tab.active {
+            background: var(--secondary);
+            color: white;
+            border-color: var(--secondary);
+        }
+
+        .form-panel {
+            display: none;
+            background: var(--sidebar-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: var(--glass-shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        .form-panel.active {
+            display: block;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-group input,
+        .form-group select {
+            padding: 1rem;
+            font-size: 1.1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-family: inherit;
+            background-color: white;
+            color: var(--primary);
+            font-weight: 500;
+        }
+
+        .btn-predict {
+            margin-top: 1.5rem;
+            width: 100%;
+            padding: 1rem;
+            background: var(--secondary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-predict:hover {
+            background: var(--primary);
+        }
+
+        .result-box {
+            margin-top: 1.5rem;
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: 600;
+            display: none;
+        }
+
+        .result-safe {
+            background: #D1FAE5;
+            color: #065F46;
+            border: 1px solid #34D399;
+        }
+
+        .result-danger {
+            background: #FEE2E2;
+            color: #991B1B;
+            border: 1px solid #F87171;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo-area">
+                <span class="icon">⚕️</span>
+                <h2 style="font-size: 1.25rem;">Doctor Dashboard</h2>
+            </div>
+            <nav class="nav-menu">
+                <a href="doctor-dashboard.html" class="nav-item"><span class="icon">👥</span> My Patients</a>
+                <a href="diagnostics.html" class="nav-item active"><span class="icon">🔍</span> Disease Prediction</a>
+                <a href="#" class="nav-item"><span class="icon">📅</span> Schedule</a>
+                <a href="#" class="nav-item"><span class="icon">🔔</span> Triage Alerts</a>
+            </nav>
+            <div class="logout-btn" style="margin-top:auto">
+                <a href="index.html" class="nav-item"><span class="icon">🚪</span> Logout</a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-header"
+                style="margin-bottom: 24px; position: relative; display: flex; align-items: center; min-height: 80px;">
+                <div class="welcome-text">
+                    <h1>Disease prediction module</h1>
+                    <p style="color:var(--text-muted)">Predict health risks instantly using our Machine Learning
+                        modules.</p>
+                </div>
+                <div
+                    style="position: absolute; left: 50%; transform: translateX(-50%); font-size: 3.2rem; font-weight: 800; font-family: 'Inter', 'Outfit', sans-serif; letter-spacing: 1.5px; background: linear-gradient(135deg, var(--primary), var(--secondary)); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                    MedSarthi
+                </div>
+            </header>
+
+            <div class="tabs">
+                <div class="tab active" onclick="switchTab('diabetes')">🩸 Diabetes</div>
+                <div class="tab" onclick="switchTab('heart')">❤️ Heart Disease</div>
+                <div class="tab" onclick="switchTab('xray')">🩻 Chest X-Ray</div>
+                <div class="tab" onclick="switchTab('mri')">🧠 Brain MRI</div>
+            </div>
+
+            <!-- Diabetes Panel -->
+            <div id="diabetes-panel" class="form-panel active">
+                <h3>Diabetes Prediction Module</h3>
+                <br>
+                <form id="diabetes-form">
+                    <div class="form-grid">
+                        <div class="form-group"><label>Age</label>
+                            <input type="number" id="d-age" value="30" min="1" max="120" required>
+                        </div>
+                        <div class="form-group"><label>Pregnancies</label>
+                            <input type="number" id="d-preg" value="1" min="0" max="25" required>
+                        </div>
+                        <div class="form-group"><label>Glucose (mg/dL)</label>
+                            <input type="number" id="d-glu" value="100" min="0" max="400" required>
+                        </div>
+                        <div class="form-group"><label>Blood Pressure (mm Hg)</label>
+                            <input type="number" id="d-bp" value="70" min="0" max="250" required>
+                        </div>
+                        <div class="form-group"><label>Skin Thickness (mm)</label>
+                            <input type="number" id="d-skin" value="20" min="0" max="100" required>
+                        </div>
+                        <div class="form-group"><label>Insulin (IU/mL)</label>
+                            <input type="number" id="d-ins" value="80" min="0" max="1000" required>
+                        </div>
+                        <div class="form-group"><label>BMI</label>
+                            <input type="number" step="0.1" id="d-bmi" value="25.0" min="10" max="80" required>
+                        </div>
+                        <div class="form-group"><label>Diabetes Pedigree Function</label>
+                            <input type="number" step="0.01" id="d-dpf" value="0.5" min="0" max="3" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-predict">Analyze Risk</button>
+                </form>
+                <div id="diabetes-res" class="result-box"></div>
+            </div>
+
+            <!-- Heart Panel -->
+            <div id="heart-panel" class="form-panel">
+                <h3>Heart Disease Prediction Module</h3>
+                <br>
+                <form id="heart-form">
+                    <div class="form-grid">
+                        <div class="form-group"><label>Age</label>
+                            <input type="number" id="h-age" value="50" min="1" max="120" required>
+                        </div>
+                        <div class="form-group"><label>Sex</label>
+                            <select id="h-sex" required>
+                                <option value="1">Male</option>
+                                <option value="0">Female</option>
+                            </select>
+                        </div>
+                        <div class="form-group"><label>Chest Pain Type</label>
+                            <select id="h-cp" required>
+                                <option value="0">Typical Angina</option>
+                                <option value="1" selected>Atypical Angina</option>
+                                <option value="2">Non-anginal Pain</option>
+                                <option value="3">Asymptomatic</option>
+                            </select>
+                        </div>
+                        <div class="form-group"><label>Resting Blood Pressure (mm Hg)</label>
+                            <input type="number" id="h-trestbps" value="120" min="50" max="250" required>
+                        </div>
+                        <div class="form-group"><label>Cholesterol (mg/dl)</label>
+                            <input type="number" id="h-chol" value="200" min="50" max="600" required>
+                        </div>
+                        <div class="form-group"><label>Fasting Blood Sugar > 120 mg/dl</label>
+                            <select id="h-fbs" required>
+                                <option value="0">False (< 120 mg/dl)</option>
+                                <option value="1">True (> 120 mg/dl)</option>
+                            </select>
+                        </div>
+                        <div class="form-group"><label>Resting ECG Results</label>
+                            <select id="h-restecg" required>
+                                <option value="0">Normal</option>
+                                <option value="1">ST-T Wave Abnormality</option>
+                                <option value="2">Left Ventricular Hypertrophy</option>
+                            </select>
+                        </div>
+                        <div class="form-group"><label>Max Heart Rate Achieved</label>
+                            <input type="number" id="h-thalach" value="150" min="50" max="250" required>
+                        </div>
+                        <div class="form-group"><label>Exercise Induced Angina</label>
+                            <select id="h-exang" required>
+                                <option value="0">No</option>
+                                <option value="1">Yes</option>
+                            </select>
+                        </div>
+                        <div class="form-group"><label>ST Depression (Oldpeak)</label>
+                            <input type="number" step="0.1" id="h-oldpeak" value="0.0" min="0" max="10" required>
+                        </div>
+                        <div class="form-group"><label>Slope of Peak Exercise ST Segment</label>
+                            <select id="h-slope" required>
+                                <option value="0">Upsloping</option>
+                                <option value="1" selected>Flat</option>
+                                <option value="2">Downsloping</option>
+                            </select>
+                        </div>
+                        <div class="form-group"><label>Num Major Vessels</label>
+                            <select id="h-ca" required>
+                                <option value="0">0</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                            </select>
+                        </div>
+                        <div class="form-group"><label>Thalassemia</label>
+                            <select id="h-thal" required>
+                                <option value="1">Normal</option>
+                                <option value="2">Fixed Defect</option>
+                                <option value="3">Reversable Defect</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-predict">Analyze Risk</button>
+                </form>
+                <div id="heart-res" class="result-box"></div>
+            </div>
+
+            <!-- X-Ray Panel -->
+            <div id="xray-panel" class="form-panel">
+                <h3>Pneumonia X-Ray Detection</h3>
+                <br>
+                <form id="xray-form">
+                    <div class="form-group">
+                        <label>Upload Chest X-Ray Image</label>
+                        <input type="file" id="xray-file" accept="image/*" required>
+                    </div>
+                    <button type="submit" class="btn-predict">Analyze Scan</button>
+                </form>
+                <div id="xray-res" class="result-box"></div>
+            </div>
+
+            <!-- MRI Panel -->
+            <div id="mri-panel" class="form-panel">
+                <h3>Brain Tumor Detection</h3>
+                <br>
+                <form id="mri-form">
+                    <div class="form-group">
+                        <label>Upload Brain MRI Scan</label>
+                        <input type="file" id="mri-file" accept="image/*" required>
+                    </div>
+                    <button type="submit" class="btn-predict">Analyze Scan</button>
+                </form>
+                <div id="mri-res" class="result-box"></div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        // Restrict Access: Ensure ONLY Doctors can view this module
+        // (Even if a patient tries to manually type the URL)
+        window.addEventListener('DOMContentLoaded', () => {
+            const docId = localStorage.getItem('loggedInDoctorId');
+            if (!docId) {
+                alert("Unauthorized Access: Only verified doctors can access the prediction module.");
+                window.location.href = "index.html"; // Boot them back to login
+            }
+        });
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.form-panel').forEach(p => p.classList.remove('active'));
+
+            event.target.classList.add('active');
+            document.getElementById(`${tabId}-panel`).classList.add('active');
+        }
+
+        function showResult(elId, isDanger, text) {
+            const el = document.getElementById(elId);
+            el.style.display = 'block';
+            el.className = 'result-box ' + (isDanger ? 'result-danger' : 'result-safe');
+            el.innerHTML = text;
+        }
+
+        document.getElementById('diabetes-form').onsubmit = async (e) => {
+            e.preventDefault();
+            const btn = e.target.querySelector('button');
+            btn.innerText = 'Analyzing...';
+
+            const payload = {
+                age: parseInt(document.getElementById('d-age').value),
+                pregnancies: parseInt(document.getElementById('d-preg').value),
+                glucose: parseFloat(document.getElementById('d-glu').value),
+                blood_pressure: parseFloat(document.getElementById('d-bp').value),
+                skin_thickness: parseFloat(document.getElementById('d-skin').value),
+                insulin: parseFloat(document.getElementById('d-ins').value),
+                bmi: parseFloat(document.getElementById('d-bmi').value),
+                dpf: parseFloat(document.getElementById('d-dpf').value)
+            };
+
+            try {
+                const res = await fetch('/api/diagnose/diabetes', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+
+                if (data.prediction === 1) {
+                    showResult('diabetes-res', true, `High Risk of Diabetes (Probability: ${(data.probability * 100).toFixed(1)}%)`);
+                } else {
+                    showResult('diabetes-res', false, `Low Risk of Diabetes (Probability: ${(data.probability * 100).toFixed(1)}%)`);
+                }
+            } catch (err) {
+                showResult('diabetes-res', true, 'Error: ' + err.message);
+            }
+            btn.innerText = 'Analyze Risk';
+        };
+
+        document.getElementById('heart-form').onsubmit = async (e) => {
+            e.preventDefault();
+            const btn = e.target.querySelector('button');
+            btn.innerText = 'Analyzing...';
+
+            const payload = {
+                age: parseInt(document.getElementById('h-age').value),
+                sex: parseInt(document.getElementById('h-sex').value),
+                cp: parseInt(document.getElementById('h-cp').value),
+                trestbps: parseFloat(document.getElementById('h-trestbps').value),
+                chol: parseFloat(document.getElementById('h-chol').value),
+                fbs: parseInt(document.getElementById('h-fbs').value),
+                restecg: parseInt(document.getElementById('h-restecg').value),
+                thalach: parseFloat(document.getElementById('h-thalach').value),
+                exang: parseInt(document.getElementById('h-exang').value),
+                oldpeak: parseFloat(document.getElementById('h-oldpeak').value),
+                slope: parseInt(document.getElementById('h-slope').value),
+                ca: parseInt(document.getElementById('h-ca').value),
+                thal: parseInt(document.getElementById('h-thal').value)
+            };
+
+            try {
+                const res = await fetch('/api/diagnose/heart', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+
+                if (data.prediction === 1) {
+                    showResult('heart-res', true, `High Risk of Heart Disease (Probability: ${(data.probability * 100).toFixed(1)}%)`);
+                } else {
+                    showResult('heart-res', false, `Low Risk of Heart Disease (Probability: ${(data.probability * 100).toFixed(1)}%)`);
+                }
+            } catch (err) {
+                showResult('heart-res', true, 'Error: ' + err.message);
+            }
+            btn.innerText = 'Analyze Risk';
+        };
+
+        document.getElementById('xray-form').onsubmit = async (e) => {
+            e.preventDefault();
+            const btn = e.target.querySelector('button');
+            const file = document.getElementById('xray-file').files[0];
+            if (!file) return;
+
+            btn.innerText = 'Analyzing...';
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const res = await fetch('/api/diagnose/xray', { method: 'POST', body: formData });
+                const data = await res.json();
+
+                if (data.prediction === 1) {
+                    showResult('xray-res', true, `PNEUMONIA Detected (Confidence: ${(data.probability * 100).toFixed(1)}%)`);
+                } else {
+                    showResult('xray-res', false, `NORMAL (Confidence: ${((1 - data.probability) * 100).toFixed(1)}%)`);
+                }
+            } catch (err) {
+                showResult('xray-res', true, 'Error: Could not process the X-Ray.');
+            }
+            btn.innerText = 'Analyze Scan';
+        };
+
+        document.getElementById('mri-form').onsubmit = async (e) => {
+            e.preventDefault();
+            const btn = e.target.querySelector('button');
+            const file = document.getElementById('mri-file').files[0];
+            if (!file) return;
+
+            btn.innerText = 'Analyzing...';
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const res = await fetch('/api/diagnose/mri', { method: 'POST', body: formData });
+                const data = await res.json();
+                const isDanger = data.class !== 'No_tumor';
+
+                showResult('mri-res', isDanger, `Prediction: ${data.class} (Confidence: ${(data.confidence * 100).toFixed(1)}%)`);
+            } catch (err) {
+                showResult('mri-res', true, 'Error: Could not process the MRI scan.');
+            }
+            btn.innerText = 'Analyze Scan';
+        };
+    </script>
+</body>
+
+</html>

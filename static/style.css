@@ -24,6 +24,21 @@ body {
     color: var(--text-color);
 }
 
+.medsarthi-logo-text {
+    font-size: 3.2rem !important;
+    font-weight: 800;
+    font-family: 'Outfit', sans-serif;
+    letter-spacing: 1.5px !important;
+    background: linear-gradient(90deg, var(--primary), var(--secondary));
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    display: inline-block;
+    margin: 0;
+    padding: 0;
+}
+
 .dashboard-container {
     display: flex;
     min-height: 100vh;
@@ -62,11 +77,12 @@ body {
 .nav-item {
     text-decoration: none;
     color: var(--text-muted);
-    padding: 12px 24px;
+    padding: 18px 24px;
     display: flex;
     align-items: center;
     gap: 16px;
-    font-weight: 500;
+    font-size: 1.25rem;
+    font-weight: 600;
     transition: all 0.3s ease;
 }
 
@@ -74,7 +90,7 @@ body {
 .nav-item.active {
     background-color: var(--bg-color);
     color: var(--secondary);
-    border-right: 3px solid var(--secondary);
+    border-right: 4px solid var(--secondary);
 }
 
 /* Main Content */
@@ -159,7 +175,7 @@ body {
 .welcome-text p {
     color: #4338CA;
     font-size: 1.1rem;
-    max-width: 500px;
+    max-width: 100%;
     line-height: 1.5;
 }
 
@@ -175,17 +191,31 @@ body {
     background: linear-gradient(135deg, var(--secondary), var(--secondary-hover));
     color: white;
     border: none;
-    padding: 18px 36px;
+    padding: 20px 48px;
     border-radius: 99px;
-    font-size: 1.15rem;
+    font-size: 1.6rem;
     font-weight: 600;
     font-family: inherit;
     cursor: pointer;
     display: flex;
+    justify-content: center;
     align-items: center;
-    gap: 12px;
+    gap: 16px;
     box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    height: 85px;
+    min-width: 480px;
+    overflow: hidden;
+}
+
+.vapi-button .btn-text {
+    transition: opacity 0.3s, font-size 0.3s, margin 0.3s, width 0.3s;
+    white-space: nowrap;
+}
+
+.vapi-button .mic-icon {
+    transition: font-size 0.5s, transform 0.5s;
+    font-size: 1.4rem;
 }
 
 .vapi-button:hover {
@@ -194,12 +224,17 @@ body {
 }
 
 .vapi-button.active {
-    background: #EF4444;
-    /* Red for Stop */
-    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+    background: #EF4444 !important;
+    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4) !important;
     animation: pulse 1.5s infinite;
 }
 
+.vapi-button.connecting {
+    background: #10B981 !important;
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4) !important;
+}
+
+/* Kept the pulse animation below for active state */
 @keyframes pulse {
     0% {
         box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
@@ -348,7 +383,7 @@ body {
     border: 1px solid rgba(255, 255, 255, 1);
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.4) inset;
     width: 100%;
-    max-width: 420px;
+    max-width: 480px;
     text-align: center;
 }
 
