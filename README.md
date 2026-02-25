@@ -23,7 +23,15 @@
 
 ---
 
-## 🚀 Key Features
+## � Demo Video
+
+<div align="center">
+  <video src="demo.mp4" width="100%" controls autoplay loop muted></video>
+</div>
+
+---
+
+## �🚀 Key Features
 
 ### 🎙️ 1. Multilingual Voice Assistant
 *   **One-Tap Call:** Direct browser-based voice interaction.
