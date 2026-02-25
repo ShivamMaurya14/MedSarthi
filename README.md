@@ -21,13 +21,35 @@
 *   **Preventive Care:** Intelligent ML modules categorize risks before ailments escalate.
 *   **Delivery Optimization:** Automated triage reduces administrative load on doctors.
 
-## 📺 Demo Video
+## 🖼️ Application Gallery
 
 <div align="center">
-  <video src="demo.mp4" width="100%" controls autoplay loop muted>
-    Your browser does not support the video tag.
-  </video>
+  <table style="width: 100%; border-collapse: collapse;">
+    <tr>
+      <td align="center" style="padding: 10px;">
+        <strong>Patient Dashboard</strong><br>
+        <img src="doc_assets/patient_dashboard.png" width="100%" alt="Patient Dashboard">
+      </td>
+      <td align="center" style="padding: 10px;">
+        <strong>Doctor Dashboard</strong><br>
+        <img src="doc_assets/doctor_dashboard.png" width="100%" alt="Doctor Dashboard">
+      </td>
+    </tr>
+    <tr>
+      <td align="center" style="padding: 10px;">
+        <strong>Diagnostics Page</strong><br>
+        <img src="doc_assets/diagnostics_page.png" width="100%" alt="Diagnostics Page">
+      </td>
+      <td align="center" style="padding: 10px;">
+        <strong>Login Portal</strong><br>
+        <img src="doc_assets/login_page.png" width="100%" alt="Login Portal">
+      </td>
+    </tr>
+  </table>
 </div>
+
+### 📺 Video Demonstration
+[![Watch the Demo](https://img.shields.io/badge/Watch-Demo_Video-red?style=for-the-badge&logo=youtube)](doc_assets/dashboard_demo.mp4)
 
 ---
 
