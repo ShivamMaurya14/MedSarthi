@@ -24,8 +24,7 @@
 ## 📺 Demo Video
 
 <div align="center">
-  <video width="100%" controls autoplay loop muted>
-    <source src="https://raw.githubusercontent.com/ShivamMaurya14/MedSarthi/main/demo.mp4" type="video/mp4">
+  <video src="demo.mp4" width="100%" controls autoplay loop muted>
     Your browser does not support the video tag.
   </video>
 </div>
