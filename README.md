@@ -23,9 +23,7 @@
 
 ## 📺 Demo Video
 
-<video src="https://github.com/ShivamMaurya14/MedSarthi/raw/main/demo.mp4" width="100%" controls autoplay loop muted>
-  Your browser does not support the video tag.
-</video>
+![MedSarthi Demo](https://github.com/ShivamMaurya14/MedSarthi/raw/main/demo.mp4)
 
 ---
 
