@@ -1,17 +1,15 @@
 <div align="center">
   <img src="https://img.shields.io/badge/Status-Active-brightgreen" alt="Status" />
-  <img src="https://img.shields.io/badge/Event-Codecure_SPIRIT_2026-blue" alt="Event" />
-  <img src="https://img.shields.io/badge/Institution-IIT_(BHU)_Varanasi-orange" alt="Institution" />
   
   <h1>🏥 MedSarthi</h1>
-  <p><strong>Next-Gen Multilingual Voice AI for Healthcare Accessibility</strong></p>
+  <p><strong>Scalable AI Medical Infrastructure for Triage & Diagnostics</strong></p>
 </div>
 
 ---
 
-## 🏆 Submission for Codecure (SPIRIT 2026)
+## 🚀 About the Project
 
-**MedSarthi** is a flagship entry for **Codecure (SPIRIT 2026, IIT BHU)**. We leverage AI to bridge the gap between tradition and innovation, focusing on patient engagement, health literacy, and preventive care. Inspired by industry leaders like *Sun Pharma*, we aim for Scalable Societal Impact.
+**MedSarthi** is an intelligent medical infrastructure platform designed to bridge the gap between patient needs and efficient healthcare delivery. With an advanced multilingual voice agent, it is capable of diagnosing symptoms across various regional languages, providing comprehensive diet plans and taking necessary precautions, all while accurately assessing the urgency of cases to forward reports and book appointments efficiently.
 
 ---
 
@@ -117,6 +115,5 @@ python agent.py dev
 ---
 
 <div align="center">
-  <i>"Redefining healthcare accessibility."</i><br>
-  <b>Built for Codecure | SPIRIT 2026 | IIT (BHU) Varanasi</b>
+  <i>"Redefining healthcare accessibility with scalable AI."</i><br>
 </div>
