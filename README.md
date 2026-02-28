@@ -54,9 +54,9 @@
 ## 🚀 Key Features
 
 ### 🎙️ 1. Multilingual Voice Assistant
-*   **One-Tap Call:** Direct browser-based voice interaction.
-*   **Indic Support:** Native-fidelity TTS via **Sarvam AI**.
-*   **Gemini 2.0 Brain:** Real-time reasoning, prescription explaining, and medical guidance.
+*   **One-Tap Call:** Direct browser-based voice interaction powered by **LiveKit WebRTC**.
+*   **Indic Support:** Native-fidelity Speech-to-Text (STT) & Text-to-Speech (TTS) via **Sarvam AI**.
+*   **OpenAI GPT-4o Brain:** Real-time reasoning, prescription explaining, and medical guidance.
 *   **Safety Handoff:** Auto-transfers to human triage for emergencies (e.g., chest pain).
 
 ### 👨‍⚕️ 2. Doctor Dashboard
@@ -71,7 +71,7 @@
 
 ## 🛠️ Tech Stack
 
-*   **Logic:** FastAPI (Python), Google Gemini 2.0 Flash, Sarvam AI (Indic TTS).
+*   **Logic:** FastAPI (Python), LiveKit (WebRTC), OpenAI GPT-4o, Sarvam AI (Indic STT & TTS).
 *   **ML/DL:** TensorFlow, Keras, Scikit-Learn.
 *   **Frontend:** Vanilla JS, CSS3 (Glassmorphism), HTML5.
 
