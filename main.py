@@ -17,6 +17,7 @@ from dotenv import load_dotenv
 import tempfile
 from openai import AsyncOpenAI
 from typing import Optional, List
+from livekit.api import AccessToken, VideoGrants
 
 # ── Disease Prediction Model Paths ──────────────────────────────────────
 MODELS_DIR = os.path.join(os.path.dirname(__file__), "models")
@@ -229,6 +230,35 @@ async def get_config():
         "vapi_assistant_id": os.getenv("VAPI_ASSISTANT_ID", "")
     }
 
+@app.get("/api/livekit-token")
+async def get_livekit_token():
+    """
+    Generates a LiveKit access token for the web client to join the voice agent room.
+    """
+    api_key = os.getenv("LIVEKIT_API_KEY")
+    api_secret = os.getenv("LIVEKIT_API_SECRET")
+    livekit_url = os.getenv("LIVEKIT_URL")
+    
+    if not api_key or not api_secret or not livekit_url:
+        raise HTTPException(status_code=500, detail="LiveKit credentials missing in environment")
+
+    # A single room for demonstration purposes
+    room_name = "medsarthi-clinic"
+    participant_name = "patient-web"
+    
+    token = AccessToken(api_key, api_secret) \
+        .with_identity(participant_name) \
+        .with_name("Web Patient") \
+        .with_grants(VideoGrants(
+            room_join=True,
+            room=room_name,
+        ))
+    
+    return {
+        "token": token.to_jwt(),
+        "url": livekit_url
+    }
+
 @app.post("/book-appointment")
 async def book_appointment(request: AppointmentRequest):
     """
@@ -438,71 +468,6 @@ async def upload_report_for_ai(files: List[UploadFile] = File(...) ):
     
     return {"status": "success", "message": f"{len(files)} report(s) analyzed and added to AI context."}
 
-@app.post("/api/voice-chat")
-async def process_voice_chat(audio: UploadFile = File(...)):
-    """
-    Core Voice Endpoint: STT (OpenAI Whisper) -> LLM (OpenAI GPT-4o-mini) -> TTS (OpenAI)
-    """
-    if not openai_client:
-        raise HTTPException(status_code=500, detail="OpenAI API Key is missing")
-
-    try:
-        # Read the raw webm audio from the browser
-        audio_data = await audio.read()
-        
-        # 1. STT via OpenAI Whisper
-        logger.info("Sending Audio to OpenAI Whisper for STT...")
-        
-        # Whisper requires a file-like object with a filename (like .webm)
-        with tempfile.NamedTemporaryFile(suffix=".webm", delete=True, mode="wb") as temp_audio:
-            temp_audio.write(audio_data)
-            temp_audio.flush()
-            
-            with open(temp_audio.name, 'rb') as f:
-                transcription = await openai_client.audio.transcriptions.create(
-                    model="whisper-1",
-                    file=f
-                )
-                
-        user_text = transcription.text.strip()
-        logger.info(f"User Transcribed: {user_text}")
-        
-        if not user_text:
-            return {"reply_text": "", "audio_base64": None}
-
-        # 2. LLM response via OpenAI GPT-4o-mini
-        logger.info("Sending transcribed text to OpenAI GPT-4o-mini...")
-        chat_messages.append({"role": "user", "content": user_text})
-        
-        completion = await openai_client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=chat_messages,
-            temperature=0.3
-        )
-        
-        ai_reply = completion.choices[0].message.content.strip()
-        chat_messages.append({"role": "assistant", "content": ai_reply})
-        
-        logger.info(f"AI Replied: {ai_reply}")
-
-        # 3. TTS via OpenAI TTS
-        logger.info("Generating audio via OpenAI TTS...")
-        tts_response = await openai_client.audio.speech.create(
-            model="tts-1",
-            voice="nova",
-            input=ai_reply
-        )
-        
-        audio_bytes = tts_response.read()
-        audio_b64 = base64.b64encode(audio_bytes).decode("utf-8")
-        
-        return {
-            "reply_text": ai_reply,
-            "audio_base64": audio_b64
-        }
-    except Exception as e:
-        logger.error(f"Voice Chat Pipeline Error: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
 
 
 # --- Diagnostics Endpoints ---

@@ -92,15 +92,27 @@ pip install -r requirements.txt
 
 ### 2. Environment (`.env`)
 ```env
-GEMINI_API_KEY="your_key"
-SARVAM_API_KEY="your_key"
+LIVEKIT_URL=wss://your-project-url.livekit.cloud
+LIVEKIT_API_KEY=your_livekit_key
+LIVEKIT_API_SECRET=your_livekit_secret
+SARVAM_API_KEY=your_sarvam_key
+OPENAI_API_KEY=your_openai_key
 ```
 
 ### 3. Run
+
+You will need to run both the FastAPI backend and the LiveKit agent process simultaneously.
+
+**Terminal 1 (Backend Web Server):**
 ```bash
 uvicorn main:app --reload
 ```
-Visit `http://localhost:8000` to start.
+Visit `http://localhost:8000` to access the dashboards.
+
+**Terminal 2 (LiveKit Voice Agent):**
+```bash
+python agent.py dev
+```
 
 ---
 
