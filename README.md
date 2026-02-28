@@ -1,6 +1,4 @@
 <div align="center">
-  <img src="https://img.shields.io/badge/Status-Active-brightgreen" alt="Status" />
-  
   <h1>🏥 MedSarthi</h1>
   <p><strong>Scalable AI Medical Infrastructure for Triage & Diagnostics</strong></p>
 </div>
