@@ -63,8 +63,9 @@ class VoiceAgent(Agent):
     
     async def on_enter(self):
         """Called when user joins - agent starts the conversation"""
-        # The agent will start speaking based on the GREETING instruction
-        self.session.generate_reply()
+        # We explicitly provide the greeting message to avoid an initial LLM call here,
+        # which ensures the greeting is always delivered without API quota errors.
+        self.session.say("Hello! I am MedSarthi, your AI assistant. How can I help you with your health today? Would you like symptom diagnosis or to analyze medical reports?")
 
 async def entrypoint(ctx: JobContext):
     """Main entry point - LiveKit calls this when a user connects"""
