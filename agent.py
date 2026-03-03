@@ -63,6 +63,7 @@ class VoiceAgent(Agent):
     
     async def on_enter(self):
         """Called when user joins - agent starts the conversation"""
+        logger.info("Agent entered the room. Initiating greeting sequence.")
         # We explicitly provide the greeting message to avoid an initial LLM call here,
         # which ensures the greeting is always delivered without API quota errors.
         self.session.say("Hello! I am MedSarthi, your AI assistant. How can I help you with your health today? Would you like symptom diagnosis or to analyze medical reports?")
