@@ -1,6 +1,6 @@
 <div align="center">
   <h1>🏥 MedSarthi</h1>
-  <p><strong>An intelligent, multi-indi-lingual AI Medical Infrastructure for Triage & Diagnostics</strong></p>
+  <p><strong>An intelligent, multi-indi-lingual AI assistant for Triage & Diagnostics</strong></p>
 </div>
 
 ---
