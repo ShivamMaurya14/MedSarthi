@@ -230,6 +230,13 @@ async def get_config():
         "vapi_assistant_id": os.getenv("VAPI_ASSISTANT_ID", "")
     }
 
+@app.get("/api/health")
+async def health_check():
+    """
+    Simple health check endpoint for load balancers and system monitoring.
+    """
+    return {"status": "healthy", "version": "1.0.0", "service": "Healthcare AI Voice Agent"}
+
 @app.get("/api/livekit-token")
 async def get_livekit_token():
     """
