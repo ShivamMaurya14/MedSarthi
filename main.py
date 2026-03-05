@@ -1,6 +1,6 @@
-import os
-import sys
 import logging
+import random
+import os
 import io
 import requests
 import base64
@@ -251,7 +251,9 @@ async def get_livekit_token():
 
     # A single room for demonstration purposes
     room_name = "medsarthi-clinic"
-    participant_name = "patient-web"
+    # In a real app, this would be based on logged-in user session
+    participant_name = f"patient-{random.randint(1000, 9999)}"
+    logger.info(f"Generating LiveKit token for participant: {participant_name} in room: {room_name}")
     
     token = AccessToken(api_key, api_secret) \
         .with_identity(participant_name) \

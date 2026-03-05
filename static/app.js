@@ -90,8 +90,15 @@ function setupVapi() {
                 room.on(window.LivekitClient.RoomEvent.TrackSubscribed, (track, publication, participant) => {
                     // Play Agent Audio automatically when it's attached!
                     if (track.kind === window.LivekitClient.Track.Kind.Audio) {
+                        console.log("Subscribed to agent audio track.");
                         const audioEl = track.attach();
-                        document.body.appendChild(audioEl);
+
+                        // Fallback for browsers with strict auto-play policies
+                        audioEl.play().catch(e => {
+                            console.warn("Autoplay blocked, waiting for interaction", e);
+                            statusText.innerText = "Click anywhere to hear AI voice!";
+                            document.addEventListener('click', () => audioEl.play(), { once: true });
+                        });
                     }
                 });
 
@@ -111,9 +118,37 @@ function setupVapi() {
 
                 // 4. Connect to Room
                 await room.connect(url, token);
+                console.log("Joined room:", room.name);
 
-                // 5. Enable Local Microphone so Agent can hear us
-                await room.localParticipant.setMicrophoneEnabled(true);
+                // 5. Explicitly request and enable microphone
+                const tracks = await window.LivekitClient.createLocalTracks({
+                    audio: true,
+                    video: false,
+                });
+
+                for (const track of tracks) {
+                    await room.localParticipant.publishTrack(track);
+                    console.log("Published local track:", track.kind);
+                }
+
+                // Ensure browser audio context is active
+                if (window.LivekitClient.AudioContext) {
+                    await window.LivekitClient.AudioContext.getContext().resume();
+                }
+
+                // Check for existing tracks (in case agent was already there)
+                room.remoteParticipants.forEach(participant => {
+                    participant.trackPublications.forEach(publication => {
+                        if (publication.isSubscribed && publication.track) {
+                            const track = publication.track;
+                            if (track.kind === window.LivekitClient.Track.Kind.Audio) {
+                                const audioEl = track.attach();
+                                document.body.appendChild(audioEl);
+                                audioEl.play().catch(console.warn);
+                            }
+                        }
+                    });
+                });
 
                 // Visual Updates
                 btn.classList.remove('connecting');

@@ -4,7 +4,7 @@ python-multipart
 pydantic
 python-dotenv
 numpy
-tensorflow-cpu
+tensorflow
 keras
 scikit-learn
 scipy
@@ -19,3 +19,5 @@ livekit-api
 livekit-agents
 livekit-plugins-openai
 livekit-plugins-sarvam
+aiohttp
+livekit-plugins-silero
