@@ -11,13 +11,6 @@ scipy
 pandas
 h5py
 pillow
-requests
 gdown
-openai
-livekit
-livekit-api
-livekit-agents
-livekit-plugins-openai
-livekit-plugins-sarvam
+google-genai
 aiohttp
-livekit-plugins-silero

@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from livekit.agents import JobContext, WorkerOptions, cli, AutoSubscribe
 from livekit import rtc
 from livekit.agents.voice import Agent, AgentSession
-from livekit.plugins import openai, sarvam, silero
+from livekit.plugins import google as lkgoogle, sarvam, silero
 import aiohttp
 from typing import Annotated
 from livekit.agents import llm
@@ -116,6 +116,9 @@ class VoiceAgent(Agent):
             instructions=SYSTEM_PROMPT,
         )
     
+    async def on_enter(self):
+        self.session.say("Hello! I am MedSarthi, your AI assistant. How can I help you with your health today? Would you like symptom diagnosis or to analyze medical reports?")
+
     async def on_user_turn_completed(self, turn_ctx: llm.ChatContext, new_message: llm.ChatMessage):
         logger.info(f"AGENT DETECTED USER TURN COMPLETED: {new_message.content}")
 
@@ -143,8 +146,11 @@ async def entrypoint(ctx: JobContext):
             high_vad_sensitivity=True,
             flush_signal=True
         ),
-        llm=openai.LLM(model="gpt-4o-mini"),
-        tts=openai.TTS(voice="shimmer"), # Using OpenAI temporarily to bypass Sarvam decoding errors
+        llm=lkgoogle.LLM(model="gemini-2.0-flash"),
+        tts=sarvam.TTS(
+            target_language_code="en-IN",
+            api_key=os.getenv("SARVAM_API_KEY"),
+        ),
         tools=llm.find_function_tools(AssistantFnc()),
         min_endpointing_delay=0.8, # Increased for more natural two-way
     )
@@ -185,26 +191,7 @@ async def entrypoint(ctx: JobContext):
         agent=agent,
         room=ctx.room
     )
-    logger.info("AgentSession started. Waiting for tracks and participant to stabilize...")
-
-    # Wait for at least one remote participant to be fully connected
-    # or timeout after 5 seconds to avoid hanging
-    try:
-        if not any(ctx.room.remote_participants.values()):
-            logger.info("Waiting for remote participant to join audio...")
-            # We skip the wait if someone is already here
-            await asyncio.sleep(2.5) 
-        else:
-            await asyncio.sleep(1.5)
-    except Exception:
-        await asyncio.sleep(2.0)
-
-    try:
-        logger.info("Sending initial greeting now...")
-        session.say("Hello! I am MedSarthi, your AI assistant. How can I help you with your health today? Would you like symptom diagnosis or to analyze medical reports?")
-        logger.info("Initial greeting dispatched.")
-    except Exception as e:
-        logger.error(f"Failed to dispatch greeting: {e}")
+    logger.info("AgentSession started.")
 
     logger.info("Keep-alive loop started.")
     # Keep the entrypoint alive while the participant is in the room

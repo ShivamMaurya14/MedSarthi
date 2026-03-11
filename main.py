@@ -2,22 +2,23 @@ import logging
 import random
 import os
 import io
-import requests
 import base64
 import pickle
 import numpy as np
 import tensorflow as tf
 from tensorflow.keras.preprocessing import image
 from PIL import Image
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
 from pydantic import BaseModel
 from dotenv import load_dotenv
 import tempfile
-from openai import AsyncOpenAI
+import aiohttp
+from google import genai
 from typing import Optional, List
-from livekit.api import AccessToken, VideoGrants
 
 # ── Disease Prediction Model Paths ──────────────────────────────────────
 MODELS_DIR = os.path.join(os.path.dirname(__file__), "models")
@@ -128,49 +129,103 @@ load_ml_models()
 load_dl_models()
 
 
-# Basic OpenAI setup for chat memory
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-if OPENAI_API_KEY and OPENAI_API_KEY != "your_openai_api_key_here":
-    openai_client = AsyncOpenAI(api_key=OPENAI_API_KEY)
-    
-    system_instruction = (
-        "You are an empathetic, professional healthcare AI assistant built for an Indian regional hospital. "
-        "Your default speaking language must be English. However, if the patient starts speaking in Hindi or another regional language, seamlessly switch to their language to make them comfortable.\n\n"
-        "### CONVERSATION WORKFLOW (MANDATORY):\n"
-        "You MUST follow these explicit steps in order during the conversation:\n"
-        "1. GREETING & INITIAL QUESTION: Greet the user based on their language. Ask them how they would like to connect to the doctor today: via symptom diagnosis (telling you how they feel) OR via medical reports.\n"
-        "2. DATA GATHERING:\n"
-        "   - If Symptoms: Ask the patient ONE BY ONE the questions required to diagnose their condition. Do not ask a big list. Ask one question, wait for answer, then ask the next.\n"
-        "   - If Reports: Ask them to upload/provide their report or tell you their patient ID so you can pull it using the `analyze_medical_report` tool.\n"
-        "3. ANALYSIS & RECOMMENDATIONS: Once you have enough symptoms OR the medical report analysis, provide the user with the possible condition/diagnosis. Then, explain the diet plan and precautions verbally.\n"
-        "4. OFFER WRITTEN PLAN: Ask the user if they want the diet plan and precautions sent to them in written format via SMS. If they say yes, use the `send_written_plan` tool.\n"
-        "5. URGENCY & CONNECTION (CRITICAL): Assess the urgency of the patient's condition.\n"
-        "   - IF URGENT/SERIOUS (severe symptoms, high pain, emergency): State that immediate attention is required. Use the `forward_to_doctor` tool to send the report, AND use the `book_appointment` tool to book an *earlier/urgent* appointment (specify 'Urgent' or 'Today' as the date) to see the doctor right away. (Optionally handoff to a human nurse).\n"
-        "   - IF NON-URGENT (routine checking, mild symptoms, general advice): State that medicines may be required and you will forward their details. Use the `forward_to_doctor` tool to send the report, AND use the `book_appointment` tool to schedule a regular future visit with the doctor.\n"
-        "6. CLOSING: Finally, ask 'What more can I do for you today?' in the language the patient is speaking.\n\n"
-        "### STRICT GUARDRAILS:\n"
-        "1. NO FINAL MEDICAL CONCLUSIONS: Say 'Based on your symptoms, it could be [condition], but the doctor will confirm.' Do not prescribe medicine.\n"
-        "2. 8TH-GRADE READING LEVEL: Simplify all medical jargon.\n"
-        "3. CULTURAL RELEVANCE: Use contextually appropriate Indian analogies for diet.\n"
-        "4. ESCALATION: Transfer to human nurse/doctor immediately if severe symptoms are detected using `handoff_to_human`.\n\n"
-        "Keep your responses extremely short and conversational, so it sounds great when spoken out loud via text-to-speech. "
-        "Do not output markdown, bullet points, or special characters."
-    )
-    # Store simple conversation memory in a global list (for demo purposes)
-    chat_messages = [{"role": "system", "content": system_instruction}]
-    
+# ── Gemini setup for chat memory ───────────────────────────────────────
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+
+SYSTEM_INSTRUCTION = (
+    "You are MedSarthi, an empathetic and professional healthcare AI voice assistant built for an Indian regional hospital. "
+    "You ALWAYS start the conversation first. You greet the patient warmly and ask them how you can help today.\n\n"
+    "Your default speaking language is English. However, if the patient speaks in Hindi or another regional language, seamlessly switch to their language to make them comfortable.\n\n"
+    "### CONVERSATION WORKFLOW (MANDATORY):\n"
+    "You MUST follow these explicit steps in order during the conversation:\n"
+    "1. GREETING & INITIAL QUESTION (YOU START FIRST): Warmly greet the patient and introduce yourself. Then ask how they would like to connect to the doctor today: via symptom diagnosis (telling you how they feel) OR via medical reports. You must speak first — never wait for the patient to begin.\n"
+    "2. DATA GATHERING:\n"
+    "   - If Symptoms: Ask the patient ONE BY ONE the questions required to diagnose their condition. Do not ask a big list. Ask one question, wait for answer, then ask the next.\n"
+    "   - If Reports: Ask them to upload/provide their report or tell you their patient ID so you can pull it using the `analyze_medical_report` tool.\n"
+    "3. ANALYSIS & RECOMMENDATIONS: Once you have enough symptoms OR the medical report analysis, provide the user with the possible condition/diagnosis. Then, explain the diet plan and precautions verbally.\n"
+    "4. OFFER WRITTEN PLAN: Ask the user if they want the diet plan and precautions sent to them in written format via SMS. If they say yes, use the `send_written_plan` tool.\n"
+    "5. URGENCY & CONNECTION (CRITICAL): Assess the urgency of the patient's condition.\n"
+    "   - IF URGENT/SERIOUS (severe symptoms, high pain, emergency): State that immediate attention is required. Use the `forward_to_doctor` tool to send the report, AND use the `book_appointment` tool to book an *earlier/urgent* appointment (specify 'Urgent' or 'Today' as the date) to see the doctor right away. (Optionally handoff to a human nurse).\n"
+    "   - IF NON-URGENT (routine checking, mild symptoms, general advice): State that medicines may be required and you will forward their details. Use the `forward_to_doctor` tool to send the report, AND use the `book_appointment` tool to schedule a regular future visit with the doctor.\n"
+    "6. CLOSING: Finally, ask 'What more can I do for you today?' in the language the patient is speaking.\n\n"
+    "### STRICT GUARDRAILS:\n"
+    "1. NO FINAL MEDICAL CONCLUSIONS: Say 'Based on your symptoms, it could be [condition], but the doctor will confirm.' Do not prescribe medicine.\n"
+    "2. 8TH-GRADE READING LEVEL: Simplify all medical jargon.\n"
+    "3. CULTURAL RELEVANCE: Use contextually appropriate Indian analogies for diet.\n"
+    "4. ESCALATION: Transfer to human nurse/doctor immediately if severe symptoms are detected using `handoff_to_human`.\n\n"
+    "Keep your responses extremely short and conversational, so it sounds great when spoken out loud via text-to-speech. "
+    "Do not output markdown, bullet points, or special characters."
+)
+
+if GOOGLE_API_KEY:
+    genai_client = genai.Client(api_key=GOOGLE_API_KEY)
 else:
-    openai_client = None
-    chat_messages = []
+    genai_client = None
+
+# Gemini chat session (maintains conversation memory)
+gemini_chat = None
+greeting_seeded = False
+
+def get_gemini_chat():
+    global gemini_chat
+    if gemini_chat is None and genai_client:
+        gemini_chat = genai_client.chats.create(
+            model="gemini-2.0-pro",
+            config=genai.types.GenerateContentConfig(
+                system_instruction=SYSTEM_INSTRUCTION,
+            ),
+        )
+    return gemini_chat
+
+# Helper: Sarvam STT (speech-to-text)
+async def sarvam_stt(audio_bytes: bytes, language: str = "en-IN") -> str:
+    sarvam_key = os.getenv("SARVAM_API_KEY")
+    async with aiohttp.ClientSession() as session:
+        form = aiohttp.FormData()
+        form.add_field("file", audio_bytes, filename="audio.wav", content_type="audio/wav")
+        form.add_field("language_code", language)
+        form.add_field("model", "saarika:v2")
+        headers = {"api-subscription-key": sarvam_key}
+        async with session.post("https://api.sarvam.ai/speech-to-text", data=form, headers=headers) as r:
+            result = await r.json()
+            return result.get("transcript", "")
+
+# Helper: Sarvam TTS (text-to-speech) → returns base64 audio
+async def sarvam_tts(text: str, language: str = "en-IN") -> str:
+    sarvam_key = os.getenv("SARVAM_API_KEY")
+    async with aiohttp.ClientSession() as session:
+        payload = {
+            "inputs": [text],
+            "target_language_code": language,
+            "speaker": "anushka",
+            "model": "bulbul:v2",
+            "enable_preprocessing": True
+        }
+        headers = {"api-subscription-key": sarvam_key, "Content-Type": "application/json"}
+        async with session.post("https://api.sarvam.ai/text-to-speech", json=payload, headers=headers) as r:
+            result = await r.json()
+            return result.get("audios", [""])[0]
 
 global_appointments = []
 global_triage_reports = []
 
 app = FastAPI(
-    title="Healthcare AI Voice Agent Server",
-    description="Backend to handle Vapi.ai server actions like scheduling and call handoffs.",
-    version="1.0.0"
+    title="MedSarthi Healthcare AI Server",
+    description="Direct STT→Gemini→TTS voice pipeline",
+    version="2.0.0"
 )
+
+# Middleware to prevent browser caching of static files
+class NoCacheMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        response = await call_next(request)
+        if request.url.path.endswith(('.js', '.html', '.css')):
+            response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+            response.headers["Pragma"] = "no-cache"
+            response.headers["Expires"] = "0"
+        return response
+
+app.add_middleware(NoCacheMiddleware)
 
 class AppointmentRequest(BaseModel):
     patient_name: str
@@ -221,52 +276,66 @@ async def get_patient_profile(patient_id: str):
 
 @app.get("/api/config")
 async def get_config():
-    """
-    Provides the frontend with public keys safely so users don't need to be prompted.
-    Never expose secret API keys here, only public IDs.
-    """
-    return {
-        "vapi_public_key": os.getenv("VAPI_PUBLIC_KEY", ""),
-        "vapi_assistant_id": os.getenv("VAPI_ASSISTANT_ID", "")
-    }
+    return {"service": "MedSarthi", "mode": "direct-voice"}
 
 @app.get("/api/health")
 async def health_check():
-    """
-    Simple health check endpoint for load balancers and system monitoring.
-    """
-    return {"status": "healthy", "version": "1.0.0", "service": "Healthcare AI Voice Agent"}
+    return {"status": "healthy", "version": "2.0.0", "service": "MedSarthi Direct Voice"}
 
-@app.get("/api/livekit-token")
-async def get_livekit_token():
-    """
-    Generates a LiveKit access token for the web client to join the voice agent room.
-    """
-    api_key = os.getenv("LIVEKIT_API_KEY")
-    api_secret = os.getenv("LIVEKIT_API_SECRET")
-    livekit_url = os.getenv("LIVEKIT_URL")
-    
-    if not api_key or not api_secret or not livekit_url:
-        raise HTTPException(status_code=500, detail="LiveKit credentials missing in environment")
+GREETING_TEXT = "Namaste! I am MedSarthi, your personal health assistant. Welcome! Tell me, how would you like to connect with the doctor today? You can describe your symptoms to me, or if you have any medical reports, I can help with those too. How can I assist you?"
 
-    # A single room for demonstration purposes
-    room_name = "medsarthi-clinic"
-    # In a real app, this would be based on logged-in user session
-    participant_name = f"patient-{random.randint(1000, 9999)}"
-    logger.info(f"Generating LiveKit token for participant: {participant_name} in room: {room_name}")
-    
-    token = AccessToken(api_key, api_secret) \
-        .with_identity(participant_name) \
-        .with_name("Web Patient") \
-        .with_grants(VideoGrants(
-            room_join=True,
-            room=room_name,
-        ))
-    
-    return {
-        "token": token.to_jwt(),
-        "url": livekit_url
-    }
+@app.get("/api/greeting")
+async def get_greeting():
+    """Auto-greeting: static text → Sarvam TTS. No Gemini call needed."""
+    try:
+        audio_b64 = await sarvam_tts(GREETING_TEXT)
+        return {"audio_base64": audio_b64, "text": GREETING_TEXT}
+    except Exception as e:
+        logger.error(f"Greeting TTS error: {e}")
+        raise HTTPException(status_code=500, detail="Greeting TTS failed")
+
+@app.post("/api/voice-chat")
+async def voice_chat(audio: UploadFile = File(...)):
+    """
+    Core voice pipeline: receives patient audio → Sarvam STT → Gemini LLM → Sarvam TTS → returns audio + text.
+    """
+    chat = get_gemini_chat()
+    if not chat:
+        raise HTTPException(status_code=500, detail="Gemini not configured")
+
+    audio_bytes = await audio.read()
+    logger.info(f"Received audio: {len(audio_bytes)} bytes")
+
+    # 1. STT: audio → text
+    transcript = await sarvam_stt(audio_bytes)
+    logger.info(f"STT transcript: {transcript}")
+    if not transcript.strip():
+        return {"transcript": "", "reply": "I couldn't hear you clearly. Could you please repeat?", "audio_base64": await sarvam_tts("I couldn't hear you clearly. Could you please repeat?")}
+
+    # Seed greeting context on first user message so Gemini knows what it said
+    global greeting_seeded
+    if not greeting_seeded:
+        greeting_seeded = True
+        chat.send_message(f"[System: You just greeted the patient with: '{GREETING_TEXT}'. Now respond to their message.]")
+
+    # 2. LLM: text → response
+    response = chat.send_message(transcript)
+    reply_text = response.text.strip()
+    logger.info(f"Gemini reply: {reply_text}")
+
+    # 3. TTS: response → audio
+    audio_b64 = await sarvam_tts(reply_text)
+
+    return {"transcript": transcript, "reply": reply_text, "audio_base64": audio_b64}
+
+@app.post("/api/reset-chat")
+async def reset_chat():
+    """Resets the conversation memory for a new session."""
+    global gemini_chat
+    global greeting_seeded
+    gemini_chat = None
+    greeting_seeded = False
+    return {"status": "success", "message": "Chat session reset."}
 
 @app.post("/book-appointment")
 async def book_appointment(request: AppointmentRequest):
@@ -427,53 +496,25 @@ async def get_doctor_dashboard_data():
         "reports": global_triage_reports
     }
 
-@app.get("/api/greeting")
-async def get_greeting():
-    """
-    Returns the initial greeting audio via OpenAI TTS.
-    """
-    if not openai_client:
-        raise HTTPException(status_code=500, detail="OpenAI API Key is missing")
-        
-    logger.info("Generating greeting audio via OpenAI TTS...")
-    
-    try:
-        response = await openai_client.audio.speech.create(
-            model="tts-1",
-            voice="nova",
-            input="Hello! I am MedSarthi, your AI assistant. How can I help you with your health today?"
-        )
-        # Read the raw bytes and convert to base64
-        audio_data = response.read()
-        audio_b64 = base64.b64encode(audio_data).decode("utf-8")
-        
-        return {"audio_base64": audio_b64, "text": "Hello! I am MedSarthi, your AI assistant. How can I help you with your health today?"}
-    except Exception as e:
-        logger.error(f"OpenAI TTS Greeting Error: {e}")
-        raise HTTPException(status_code=500, detail="Greeting TTS failed")
-
 @app.post("/api/upload-report-for-ai")
-async def upload_report_for_ai(files: List[UploadFile] = File(...) ):
+async def upload_report_for_ai(files: List[UploadFile] = File(...)):
     """
-    Accepts multiple medical report files from the patient dashboard and injects simulated OCR/Analysis
-    context directly into the AI's conversation memory so the AI can discuss them.
+    Accepts medical report files and injects simulated analysis into Gemini chat memory.
     """
     filenames = [f.filename for f in files]
     logger.info(f"Received file uploads: {filenames}")
     
     names_str = ", ".join(filenames)
     simulated_findings = (
-        f"The user has just uploaded {len(files)} medical report(s) named: {names_str}. "
+        f"[System: The patient has uploaded {len(files)} medical report(s) named: {names_str}. "
         "The report indicates: Fasting Blood Sugar is 150 mg/dL (High), "
         "LDL Cholesterol is 160 mg/dL (Elevated), and Blood Pressure is 135/85. "
-        "Please acknowledge these reports and advise the patient based on these findings if they ask."
+        "Please acknowledge these reports and advise the patient based on these findings when they ask.]"
     )
     
-    # Inject it into the AI's short-term memory
-    chat_messages.append({
-        "role": "system",
-        "content": simulated_findings
-    })
+    chat = get_gemini_chat()
+    if chat:
+        chat.send_message(simulated_findings)
     
     return {"status": "success", "message": f"{len(files)} report(s) analyzed and added to AI context."}
 
